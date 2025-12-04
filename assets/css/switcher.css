@@ -100,12 +100,18 @@
   text-align:right;
   font-variant-numeric: tabular-nums;
 }
+.co360-table thead th.co360-post-col,
+.co360-table tbody td.co360-post-cell{ text-align:left !important; }
+.co360-post-col{ min-width:220px; }
+.co360-post-cell{ white-space:normal; }
+.co360-post-metrics{ display:flex; flex-wrap:wrap; gap:6px; }
 .co360-breakdown-list{ display:flex; flex-direction:column; gap:10px; }
 .co360-breakdown-item{ background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:10px 12px; }
 .co360-breakdown-title{ font-weight:700; color:#0f172a; margin-bottom:8px; }
 .co360-breakdown-metrics{ display:flex; flex-wrap:wrap; gap:8px; }
 .co360-badge{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:#eef2ff; color:#312e81; font-weight:600; font-size:13px; }
 .co360-badge::before{ content:"•"; display:block; font-size:18px; line-height:1; color:#4f46e5; }
+.co360-badge--total{ background:#fef3c7; color:#92400e; }
 
 /* =========================
    LEADERBOARDS

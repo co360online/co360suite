@@ -1419,6 +1419,24 @@ if (window.jQuery) {
 
         $stats = $this->get_all_user_stats( $a['date_from'], $a['date_to'] );
 
+        $all_posts = [];
+        foreach ( $stats as $row ) {
+            foreach ( $row['per_post'] as $p ) {
+                if ( empty( $all_posts[ $p['post_id'] ] ) ) {
+                    $all_posts[ $p['post_id'] ] = $p['title'];
+                }
+            }
+        }
+
+        if ( ! empty( $all_posts ) ) {
+            uasort(
+                $all_posts,
+                function( $a, $b ) {
+                    return strcasecmp( $a, $b );
+                }
+            );
+        }
+
         $meta_labels = [
             'user_especialidad' => 'Especialidad',
             'user_centro'       => 'Centro',
@@ -1447,41 +1465,17 @@ if (window.jQuery) {
                   <th>Total Visualizaciones Slide Kit</th>
                   <th>Total Visualizaciones Highlights</th>
                   <th>Total Descargas PPT</th>
-                  <th>Detalle por presentación</th>
+                  <?php foreach ( $all_posts as $title ) : ?>
+                    <th class="co360-post-col"><?php echo esc_html( $title ); ?></th>
+                  <?php endforeach; ?>
                 </tr>
               </thead>
               <tbody>
                 <?php foreach ( $stats as $row ) :
-                    $per_post_lines = [];
+                    $per_post_map = [];
                     foreach ( $row['per_post'] as $p ) {
-                        $total = $p['view_slidekit'] + $p['view_highlights'] + $p['download_ppt'];
-                        $per_post_lines[] = sprintf(
-                            '%s | Slide Kit: %d | Highlights: %d | PPT: %d | Total: %d',
-                            $p['title'],
-                            $p['view_slidekit'],
-                            $p['view_highlights'],
-                            $p['download_ppt'],
-                            $total
-                        );
+                        $per_post_map[ $p['post_id'] ] = $p;
                     }
-                    $per_post_export = $per_post_lines ? implode( "\n", $per_post_lines ) : '—';
-                    $per_post_html   = $per_post_lines ?
-                        '<div class="co360-breakdown-list">' . implode( '', array_map(
-                            function( $line ) {
-                                $parts = explode( '|', $line );
-                                $title = trim( array_shift( $parts ) );
-                                $metrics = array_map( 'trim', $parts );
-                                return '<div class="co360-breakdown-item">'
-                                    . '<div class="co360-breakdown-title">' . esc_html( $title ) . '</div>'
-                                    . '<div class="co360-breakdown-metrics">'
-                                        . implode( '', array_map( function( $m ) {
-                                            return '<span class="co360-badge">' . esc_html( $m ) . '</span>';
-                                        }, $metrics ) )
-                                    . '</div>'
-                                . '</div>';
-                            },
-                            $per_post_lines
-                        ) ) . '</div>' : '—';
                 ?>
                 <tr>
                   <td><?php echo esc_html( $row['first_name'] ); ?></td>
@@ -1494,7 +1488,31 @@ if (window.jQuery) {
                   <td><?php echo (int) $row['totals']['view_slidekit']; ?></td>
                   <td><?php echo (int) $row['totals']['view_highlights']; ?></td>
                   <td><?php echo (int) $row['totals']['download_ppt']; ?></td>
-                  <td data-export="<?php echo esc_attr( $per_post_export ); ?>"><?php echo $per_post_html; ?></td>
+                  <?php foreach ( $all_posts as $post_id => $title ) :
+                    $has_data = isset( $per_post_map[ $post_id ] );
+                    $p        = $has_data ? $per_post_map[ $post_id ] : null;
+                    $total    = $has_data ? ( $p['view_slidekit'] + $p['view_highlights'] + $p['download_ppt'] ) : 0;
+                    $export   = $has_data ? sprintf(
+                        'Slide Kit: %d | Highlights: %d | PPT: %d | Total: %d',
+                        $p['view_slidekit'],
+                        $p['view_highlights'],
+                        $p['download_ppt'],
+                        $total
+                    ) : '—';
+                  ?>
+                  <td class="co360-post-cell" data-export="<?php echo esc_attr( $export ); ?>">
+                    <?php if ( $has_data ) : ?>
+                      <div class="co360-post-metrics">
+                        <span class="co360-badge">SK: <?php echo (int) $p['view_slidekit']; ?></span>
+                        <span class="co360-badge">HL: <?php echo (int) $p['view_highlights']; ?></span>
+                        <span class="co360-badge">PPT: <?php echo (int) $p['download_ppt']; ?></span>
+                        <span class="co360-badge co360-badge--total">Total: <?php echo (int) $total; ?></span>
+                      </div>
+                    <?php else : ?>
+                      —
+                    <?php endif; ?>
+                  </td>
+                  <?php endforeach; ?>
                 </tr>
                 <?php endforeach; ?>
               </tbody>
