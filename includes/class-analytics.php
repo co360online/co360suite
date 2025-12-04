@@ -1432,7 +1432,8 @@ if (window.jQuery) {
         <div class="co360-ga">
           <h3><?php echo esc_html( $a['title'] ); ?></h3>
 
-          <div class="co360-table-wrap">
+          <div class="co360-table-wrap co360-table-wrap--scroll">
+            <div class="co360-table-scroll">
             <table id="co360UserExportTable" class="co360-table display">
               <thead>
                 <tr>
@@ -1451,20 +1452,36 @@ if (window.jQuery) {
               </thead>
               <tbody>
                 <?php foreach ( $stats as $row ) :
-                    $per_post_lines = array_map(
-                        function( $p ) {
-                            return sprintf(
-                                '%s: Slide Kit %d | Highlights %d | PPT %d',
-                                $p['title'],
-                                $p['view_slidekit'],
-                                $p['view_highlights'],
-                                $p['download_ppt']
-                            );
-                        },
-                        $row['per_post']
-                    );
+                    $per_post_lines = [];
+                    foreach ( $row['per_post'] as $p ) {
+                        $total = $p['view_slidekit'] + $p['view_highlights'] + $p['download_ppt'];
+                        $per_post_lines[] = sprintf(
+                            '%s | Slide Kit: %d | Highlights: %d | PPT: %d | Total: %d',
+                            $p['title'],
+                            $p['view_slidekit'],
+                            $p['view_highlights'],
+                            $p['download_ppt'],
+                            $total
+                        );
+                    }
                     $per_post_export = $per_post_lines ? implode( "\n", $per_post_lines ) : '—';
-                    $per_post_html   = $per_post_lines ? implode( '<br>', array_map( 'esc_html', $per_post_lines ) ) : '—';
+                    $per_post_html   = $per_post_lines ?
+                        '<div class="co360-breakdown-list">' . implode( '', array_map(
+                            function( $line ) {
+                                $parts = explode( '|', $line );
+                                $title = trim( array_shift( $parts ) );
+                                $metrics = array_map( 'trim', $parts );
+                                return '<div class="co360-breakdown-item">'
+                                    . '<div class="co360-breakdown-title">' . esc_html( $title ) . '</div>'
+                                    . '<div class="co360-breakdown-metrics">'
+                                        . implode( '', array_map( function( $m ) {
+                                            return '<span class="co360-badge">' . esc_html( $m ) . '</span>';
+                                        }, $metrics ) )
+                                    . '</div>'
+                                . '</div>';
+                            },
+                            $per_post_lines
+                        ) ) . '</div>' : '—';
                 ?>
                 <tr>
                   <td><?php echo esc_html( $row['first_name'] ); ?></td>
@@ -1482,6 +1499,7 @@ if (window.jQuery) {
                 <?php endforeach; ?>
               </tbody>
             </table>
+            </div>
           </div>
         </div>
         <script>
@@ -1490,6 +1508,7 @@ if (window.jQuery) {
             dom: 'Blfrtip',
             colReorder: false,
             ordering: true,
+            scrollX: true,
             pageLength: 25,
             lengthMenu: [[10,25,50,100,-1],[10,25,50,100,'Todos']],
             language: {
