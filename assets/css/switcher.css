@@ -1,0 +1,814 @@
+/* =========================
+   BASE / UTILIDADES
+========================= */
+
+.co360-chartbox { position: relative; }
+.co360-chartbox canvas { width: 100% !important; height: 100% !important; display: block; }
+
+/* ===== KPI cards ===== */
+.co360-cards{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:14px;
+  margin:12px 0 18px;
+}
+@media (max-width: 900px){
+  .co360-cards{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 560px){
+  .co360-cards{ grid-template-columns:1fr; }
+}
+.co360-card{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:16px 18px;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:78px;
+}
+.co360-card strong{
+  font-size:14px;
+  color:#111827;
+  line-height:1.2;
+}
+.co360-card span{
+  font-weight:700;
+  font-size:28px;
+  line-height:1;
+  color:#111827;
+}
+.co360-cards .co360-card:nth-child(1){ border-left:4px solid #3b82f6; }
+.co360-cards .co360-card:nth-child(2){ border-left:4px solid #ec4899; }
+.co360-cards .co360-card:nth-child(3){ border-left:4px solid #f59e0b; }
+
+/* =========================
+   TABLAS
+========================= */
+
+.co360-table-wrap{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 1px 3px rgba(16,24,40,.06);
+  margin-top:16px;
+  padding: 20px;
+}
+.co360-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  min-width:720px;
+  font-size:15px;
+  color:#111827;
+}
+.co360-table thead th{
+  position:sticky; top:0; z-index:2;
+  background:#f9fafb;
+  font-weight:700;
+  letter-spacing:.2px;
+  text-align:left;
+  padding:14px 16px;
+  border-bottom:1px solid #e5e7eb;
+}
+.co360-table tbody td{
+  padding:16px;
+  border-top:1px solid #eef2f7;
+  vertical-align:middle;
+}
+.co360-table tbody tr:nth-child(odd){ background:#fff; }
+.co360-table tbody tr:nth-child(even){ background:#fcfdff; }
+.co360-table tbody tr:hover{ background:#f5f8ff; }
+.co360-table td:first-child a{
+  color:#1d4ed8;
+  font-weight:600;
+  text-decoration:none;
+  text-underline-offset:2px;
+}
+.co360-table td:first-child a:hover{ text-decoration:underline; }
+.co360-table tbody td:nth-child(n+2),
+.co360-table thead th:nth-child(n+2){
+  text-align:right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================
+   LEADERBOARDS
+========================= */
+
+.co360-lb { 
+  display: grid; 
+  grid-template-columns: repeat(2,minmax(0,1fr)); 
+  gap: 12px; 
+  margin-top: 12px;
+}
+@media (max-width: 980px){ .co360-lb { grid-template-columns: 1fr; } }
+
+.co360-lb-card{
+  background:#fff; 
+  border:1px solid #e7e7e7; 
+  border-radius:12px; 
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.co360-lb-card h4{
+  margin:0; padding:10px 12px; font-size:15px; font-weight:600; 
+  border-bottom:1px solid #efefef; color:#b10051;
+}
+.co360-lb-list{ list-style:none; margin:0; padding:4px 6px; }
+
+.co360-lb-item{
+  display:flex; align-items:center; gap:10px; 
+  padding:8px 6px; border-radius:10px;
+}
+.co360-lb-item:hover{ background:#fafafa; }
+
+.co360-lb-rank{
+  flex:0 0 auto; width:26px; height:26px; border-radius:999px;
+  display:grid; place-items:center; font:600 12px/1 system-ui, -apple-system;
+  background:#f3f4f6; color:#555;
+}
+
+/* título + subtítulo (nombre y email, o título de ponencia) */
+.co360-lb-title{ 
+  flex:1 1 auto; min-width:0; 
+  font-size:14px; line-height:1.25; 
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.co360-lb-title a{ color:#0b5cab; text-decoration:none; }
+.co360-lb-title a:hover{ text-decoration:underline; }
+
+.co360-lb-sub{
+  color:#777; font-size:12px; margin-top:2px; 
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* valor (nº de eventos / descargas / ratio) */
+.co360-lb-value{
+  flex:0 0 auto; font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding:4px 8px; border-radius:999px; background:#eef2ff; color:#1f3a8a;
+}
+
+.co360-lb-empty{ padding:12px; color:#777; font-size:13px; }
+
+/* =========================
+   SWITCHER
+========================= */
+
+.co360-switch {
+  display: grid;
+  gap: 18px;
+}
+
+/* Botones */
+.co360-switch .co360-switch-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 16px;
+}
+
+.co360-switch .co360-switch-btn {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:96px;
+  padding:20px 16px;
+  border:1px solid #e9eef3;
+  border-radius:16px;
+  background:#fff;
+  cursor:pointer;
+  transition:all .18s ease;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  text-align:center;
+  color:#5f6772;
+}
+.co360-switch .co360-switch-btn .co360-title {
+  font-size:18px;
+  line-height:1.2;
+  font-weight:700;
+  color:#5f6772;
+  margin:0 0 4px 0;
+}
+.co360-switch .co360-switch-btn .co360-sub {
+  font-size:13px;
+  letter-spacing:.06em;
+  color:#8b95a1;
+}
+.co360-switch .co360-switch-btn:hover {
+  background:#008D96 !important;
+  color:#fff !important;
+  transform:translateY(-1px);
+  box-shadow:0 6px 16px rgba(0,0,0,.08);
+}
+.co360-switch .co360-switch-btn:hover .co360-title,
+.co360-switch .co360-switch-btn:hover .co360-sub {
+  color:#fff !important;
+}
+.co360-switch .co360-switch-btn.active {
+  background:#C00159 !important;
+  color:#fff !important;
+  border-color:#C00159;
+}
+.co360-switch .co360-switch-btn.active .co360-title,
+.co360-switch .co360-switch-btn.active .co360-sub {
+  color:#fff !important;
+}
+.co360-switch a.co360-switch-btn:hover {
+  color:#fff !important;
+  text-decoration:none;
+}
+
+/* Responsive botones */
+@media (max-width: 980px){
+  .co360-switch .co360-switch-buttons { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 640px){
+  .co360-switch .co360-switch-buttons { grid-template-columns: 1fr; }
+  .co360-switch .co360-switch-btn { min-height: 84px; }
+}
+
+/* =========================
+   VIEWER 16:9
+========================= */
+
+.co360-switch .co360-viewer {
+  width:100%;
+  border:2px dashed #e3e8ef;
+  border-radius:14px;
+  padding:12px;
+  background:#f9fafb;
+  position:relative;
+}
+
+/* Placeholder inicial 16:9 */
+.co360-switch .co360-placeholder {
+  position:relative;
+  width:100%;
+  padding-bottom:56.25%;
+  height:0;
+  overflow:hidden;
+  border-radius:12px;
+}
+.co360-switch .co360-placeholder-inner {
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:20px;
+  color:#6b7280;
+  font-size:15px;
+}
+.co360-switch .co360-placeholder-inner strong {
+  font-size:18px;
+  color:#111827;
+  margin-bottom:4px;
+}
+
+/* Iframe (PDF / HTML) 16:9 */
+.co360-switch .co360-holder {
+  position:relative;
+  width:100%;
+  padding-bottom:56.25%;
+  height:0;
+  overflow:hidden;
+  border-radius:12px;
+}
+.co360-switch .co360-holder iframe {
+  position:absolute;
+  inset:0;
+  width:100% !important;
+  height:100% !important;
+  border:0;
+}
+.co360-switch .co360-holder[hidden] { display:none !important; }
+
+/* Estados vacíos / error */
+.co360-empty[hidden]{display:none!important;}
+.co360-empty{
+  display:flex;
+  height:280px;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#6b7280;
+}
+.co360-loader{padding:12px;color:#6b7280}
+.co360-error{padding:12px;color:#b00020}
+
+/* Botón móvil abrir recurso */
+.co360-mobile-open { margin-top: 10px; }
+@media (min-width: 769px){ .co360-mobile-open { display:none !important; } }
+
+/* Por si el theme limita anchos */
+.entry-content .co360-switch .co360-viewer,
+.wp-block .co360-switch .co360-viewer {
+  max-width:none !important;
+}
+
+/* Contenedor responsive genérico (si alguna vez lo usas directo) */
+.co360-responsive-iframe-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+}
+.co360-responsive-iframe-container iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+
+/* =========================
+   DataTables – estilo CO360
+   (panel general .co360-ga)
+========================= */
+
+/* Contenedor DataTables: sin caja, la caja ya la pone .co360-table-wrap */
+.co360-ga .dataTables_wrapper,
+.co360-ga .dt-container {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin-top: 0;
+  box-shadow: none;
+  font-size: 14px;
+  color: #111827;
+}
+
+/* --- Barra superior (botones, "Mostrar", buscador) --- */
+
+.co360-ga .dataTables_wrapper .dt-buttons,
+.co360-ga .dataTables_wrapper .dataTables_length,
+.co360-ga .dataTables_wrapper .dataTables_filter,
+.co360-ga .dataTables_wrapper .dt-length,
+.co360-ga .dataTables_wrapper .dt-search,
+.co360-ga .dt-container       .dt-buttons,
+.co360-ga .dt-container       .dt-length,
+.co360-ga .dt-container       .dt-search {
+  margin: 0 0 10px;
+}
+
+/* Fila de controles (DataTables 2.x) */
+.co360-ga .dt-container .dt-layout-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Botonera CSV / Excel / Columnas */
+.co360-ga .dataTables_wrapper .dt-buttons,
+.co360-ga .dt-container       .dt-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+/* Estilo base de todos los botones DataTables (un poco más grandes) */
+.co360-ga .dataTables_wrapper .dt-button,
+.co360-ga .dt-container       .dt-button {
+  border-radius: 999px;
+  padding: 9px 18px;           /* <-- más grandes */
+  border: none;
+  font-size: 14px;             /* <-- un pelín mayor */
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1;
+  box-shadow: 0 1px 2px rgba(15,23,42,.08);
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
+}
+
+/* CSV (azul) */
+.co360-ga .dataTables_wrapper .buttons-csv,
+.co360-ga .dt-container       .buttons-csv {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+/* Excel (verde/teal) */
+.co360-ga .dataTables_wrapper .buttons-excel,
+.co360-ga .dt-container       .buttons-excel {
+  background: #059669;
+  color: #ffffff;
+}
+
+/* Columnas (magenta marca) */
+.co360-ga .dataTables_wrapper .buttons-colvis,
+.co360-ga .dt-container       .buttons-colvis {
+  background: #c00159;
+  color: #ffffff;
+}
+
+.co360-ga .dataTables_wrapper .dt-button:hover,
+.co360-ga .dt-container       .dt-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15,23,42,.16);
+}
+
+/* Select "Mostrar X registros" */
+.co360-ga .dataTables_wrapper .dataTables_length,
+.co360-ga .dataTables_wrapper .dt-length,
+.co360-ga .dt-container       .dt-length {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.co360-ga .dataTables_wrapper .dataTables_length select,
+.co360-ga .dataTables_wrapper .dt-length select,
+.co360-ga .dt-container       .dt-length select {
+  margin: 0 4px;
+  padding: 4px 26px 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  font-size: 13px;
+  display: inline-block;
+}
+
+/* Buscador */
+.co360-ga .dataTables_wrapper .dataTables_filter,
+.co360-ga .dataTables_wrapper .dt-search,
+.co360-ga .dt-container       .dt-search {
+  margin-left: auto;
+}
+
+.co360-ga .dataTables_wrapper .dataTables_filter label,
+.co360-ga .dataTables_wrapper .dt-search label,
+.co360-ga .dt-container       .dt-search label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.co360-ga .dataTables_wrapper .dataTables_filter input,
+.co360-ga .dataTables_wrapper .dt-search input,
+.co360-ga .dt-container       .dt-search input {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  min-width: 180px;
+  font-size: 13px;
+}
+
+/* --- Tabla --- */
+
+.co360-ga table.dataTable,
+.co360-ga table.display {
+  width: 100% !important;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.co360-ga table.dataTable thead th,
+.co360-ga table.display     thead th {
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 16px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: #111827;
+}
+
+.co360-ga table.dataTable tbody td,
+.co360-ga table.display     tbody td {
+  padding: 14px 16px;
+  border-top: 1px solid #eef2f7;
+  vertical-align: middle;
+}
+
+.co360-ga table.dataTable tbody tr:nth-child(odd),
+.co360-ga table.display     tbody tr:nth-child(odd)  { background:#ffffff; }
+.co360-ga table.dataTable tbody tr:nth-child(even),
+.co360-ga table.display     tbody tr:nth-child(even) { background:#fcfdff; }
+.co360-ga table.dataTable tbody tr:hover,
+.co360-ga table.display     tbody tr:hover          { background:#f5f8ff; }
+
+/* Primera columna (título) en azul */
+.co360-ga table.dataTable tbody td:first-child a,
+.co360-ga table.display     tbody td:first-child a {
+  color:#0b5cab;
+  font-weight:600;
+  text-decoration:none;
+  text-underline-offset:2px;
+}
+.co360-ga table.dataTable tbody td:first-child a:hover,
+.co360-ga table.display     tbody td:first-child a:hover {
+  text-decoration:underline;
+}
+
+/* Columnas numéricas a la derecha */
+.co360-ga table.dataTable tbody td:nth-child(n+2),
+.co360-ga table.dataTable thead th:nth-child(n+2),
+.co360-ga table.display     tbody td:nth-child(n+2),
+.co360-ga table.display     thead th:nth-child(n+2){
+  text-align:right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Paginación --- */
+
+.co360-ga .dataTables_wrapper .dataTables_info,
+.co360-ga .dataTables_wrapper .dt-info,
+.co360-ga .dt-container       .dt-info {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.co360-ga .dataTables_wrapper .dataTables_paginate,
+.co360-ga .dataTables_wrapper .dt-paging,
+.co360-ga .dt-container       .dt-paging {
+  margin-top: 10px;
+  text-align: right;
+}
+
+/* Botones de página */
+.co360-ga .dataTables_wrapper .dataTables_paginate .paginate_button,
+.co360-ga .dataTables_wrapper .dt-paging button,
+.co360-ga .dt-container       .dt-paging button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  margin-left: 4px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  cursor: pointer;
+  background: #f9fafb;
+  color: #4b5563;
+}
+
+.co360-ga .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.co360-ga .dataTables_wrapper .dt-paging button.current,
+.co360-ga .dt-container       .dt-paging button.current {
+  background: #c00159;
+  color: #ffffff !important;
+  border-color: #c00159;
+}
+
+.co360-ga .dataTables_wrapper .dataTables_paginate .paginate_button:hover,
+.co360-ga .dataTables_wrapper .dt-paging button:hover,
+.co360-ga .dt-container       .dt-paging button:hover {
+  background: #e5e7eb;
+}
+
+
+/* Botones DataTables (CSV / Excel / Columnas) – forzar estilo CO360 */
+.co360-ga .dataTables_wrapper .dt-buttons .dt-button,
+.co360-ga .dt-container       .dt-buttons .dt-button {
+  border-radius: 999px !important;
+  padding: 9px 18px !important;
+  border: none !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  line-height: 1 !important;
+  box-shadow: 0 1px 2px rgba(15,23,42,.08) !important;
+  background: #2563eb;           /* color base, luego lo cambiamos por tipo */
+  color: #ffffff !important;
+  text-decoration: none !important;
+}
+
+/* CSV (azul) */
+.co360-ga .dataTables_wrapper .dt-buttons .buttons-csv,
+.co360-ga .dt-container       .dt-buttons .buttons-csv {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* Excel (verde/teal) */
+.co360-ga .dataTables_wrapper .dt-buttons .buttons-excel,
+.co360-ga .dt-container       .dt-buttons .buttons-excel {
+  background: #059669 !important;
+  color: #ffffff !important;
+}
+
+/* Columnas (magenta marca) */
+.co360-ga .dataTables_wrapper .dt-buttons .buttons-colvis,
+.co360-ga .dt-container       .dt-buttons .buttons-colvis {
+  background: #c00159 !important;
+  color: #ffffff !important;
+}
+
+/* Hover común */
+.co360-ga .dataTables_wrapper .dt-buttons .dt-button:hover,
+.co360-ga .dt-container       .dt-buttons .dt-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15,23,42,.16) !important;
+}
+
+/* ===== Ajustar posición del selector "Mostrar X registros" ===== */
+
+/* Contenedor en fila junto a los botones */
+.co360-ga .dt-container .dt-layout-row:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+
+/* Mover el select a la derecha, junto con el buscador */
+.co360-ga .dt-container .dt-length {
+  margin-left: auto !important;
+  order: 3 !important; /* Asegura que quede a la derecha */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Reducir tamaño del selector */
+.co360-ga .dt-container .dt-length select {
+  width: 70px !important;
+  padding: 4px 8px !important;
+  font-size: 13px !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  border: 1px solid #d1d5db !important;
+}
+
+/* Ajustar etiquetas (Mostrar / registros) */
+.co360-ga .dt-container .dt-length label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Quitar salto de línea "registros" */
+.co360-ga .dt-container .dt-length label span {
+  display: inline-block !important;
+}
+
+/* === Colocar "Mostrar X registros" arriba a la derecha === */
+
+.co360-ga .dt-container {
+  position: relative;
+}
+
+/* Bloque Mostrar X registros en la esquina superior derecha */
+/* Ajustar altura final del selector "Mostrar X registros" */
+.co360-ga .dt-container .dt-length {
+  position: absolute;
+  top: -4px !important;     /* Subido más arriba */
+  right: 16px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Label compacto en una sola línea */
+.co360-ga .dt-container .dt-length label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+/* Select pequeño tipo “píldora” */
+.co360-ga .dt-container .dt-length select {
+  display: inline-block !important;   /* por si algo lo oculta */
+  width: 70px !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  border: 1px solid #d1d5db !important;
+  background: #ffffff !important;
+  font-size: 13px !important;
+}
+
+/* En móvil, que vuelva al flujo normal debajo de los botones */
+@media (max-width: 640px) {
+  .co360-ga .dt-container .dt-length {
+    position: static;
+    margin-top: 8px;
+    justify-content: flex-start;
+  }
+}
+
+
+/* ===========================================
+   EXTENSIÓN DEL TEMA CO360 PARA OTROS PANELES
+   Aplica los mismos estilos DataTables a:
+   - .co360-ga  (general)
+   - .co360-ua  (mi actividad)
+   - .co360-ui  (análisis de usuarios)
+=========================================== */
+
+/* 1) Convertimos los tres en un mismo “scope” */
+.co360-ga,
+.co360-ua,
+.co360-ui {
+  --co360: 1;
+}
+
+/* 2) Para que el CSS actual de DataTables también afecte a los otros paneles */
+.co360-ga .dataTables_wrapper,
+.co360-ua .dataTables_wrapper,
+.co360-ui .dataTables_wrapper,
+
+.co360-ga .dt-container,
+.co360-ua .dt-container,
+.co360-ui .dt-container {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+/* Botones CSV/Excel/Columnas */
+.co360-ga .dt-buttons .dt-button,
+.co360-ua .dt-buttons .dt-button,
+.co360-ui .dt-buttons .dt-button {
+  border-radius: 999px !important;
+  padding: 9px 18px !important;
+  border: none !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  cursor: pointer;
+  text-decoration: none !important;
+  line-height: 1 !important;
+  box-shadow: 0 1px 2px rgba(15,23,42,.08);
+}
+
+/* Colores */
+.co360-ga .buttons-csv,
+.co360-ua .buttons-csv,
+.co360-ui .buttons-csv {
+  background: #2563eb !important;
+}
+
+.co360-ga .buttons-excel,
+.co360-ua .buttons-excel,
+.co360-ui .buttons-excel {
+  background: #059669 !important;
+}
+
+.co360-ga .buttons-colvis,
+.co360-ua .buttons-colvis,
+.co360-ui .buttons-colvis {
+  background: #c00159 !important;
+}
+
+/* Hover */
+.co360-ga .dt-buttons .dt-button:hover,
+.co360-ua .dt-buttons .dt-button:hover,
+.co360-ui .dt-buttons .dt-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15,23,42,.16);
+}
+
+/* Selector "Mostrar X registros" — alineado arriba a la derecha */
+.co360-ga .dt-length,
+.co360-ua .dt-length,
+.co360-ui .dt-length {
+  position: absolute;
+  top: -4px !important;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.co360-ga .dt-length select,
+.co360-ua .dt-length select,
+.co360-ui .dt-length select {
+  width: 70px !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  border: 1px solid #d1d5db !important;
+  background: #fff !important;
+  font-size: 13px !important;
+}
+
+/* En móvil, baja a su sitio */
+@media (max-width: 640px){
+  .co360-ga .dt-length,
+  .co360-ua .dt-length,
+  .co360-ui .dt-length {
+    position: static !important;
+    margin-top: 10px;
+  }
+}

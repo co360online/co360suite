@@ -1,0 +1,129 @@
+/* ========================================
+   ÁGORA AC PDF VIEWER – 2025 EDITION
+   ======================================== */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #f8fafc;
+  color: #1e293b;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* TOOLBAR */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.15);
+  color: white;
+  font-weight: 600;
+}
+
+.toolbar .title {
+  font-size: 1.6rem;
+  margin-right: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  visibility: hidden;
+}
+
+/* BOTONES */
+.toolbar .btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+ 0.6rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar .btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* BOTÓN ABRIR EN NAVEGADOR - ROJO DESTACADO */
+.toolbar .btn[data-action="open-external"], #btnOpen {
+  background: #dc2626 !important;
+  font-weight: 700;
+}
+
+.toolbar .btn[data-action="open-external"]:hover, #btnOpen:hover {
+  background: #b91c1c !important;
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.5) !important;
+}
+
+/* SEPARADORES */
+.toolbar .sep {
+  width: 1px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* INFO */
+.page-info {
+  background: rgba(255, 255, 255, 0.25);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* VISOR */
+.viewer {
+  height: calc(100vh - 76px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: auto;
+  padding: 1.5rem;
+  background: #e2e8f0;
+}
+
+/* CANVAS */
+canvas.page {
+  max-width: 100%;
+  height: auto !important;
+  display: block;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(30, 64, 175, 0.15);
+  background: white;
+  border: 1px solid #cbd5e1;
+}
+
+/* RESPONSIVE PERFECTO */
+@media (max-width: 768px) {
+  .toolbar {
+    gap: .5rem;
+    padding: .75rem 1rem;
+    flex-wrap: wrap;
+  }
+  .toolbar .title {
+    font-size: 1.2rem;
+    max-width: 150px;
+  }
+  .toolbar .btn {
+    padding: 0.5rem 0.7rem;
+    font-size: 13px;
+  }
+  .viewer {
+    padding: 0.5rem;
+  }
+}

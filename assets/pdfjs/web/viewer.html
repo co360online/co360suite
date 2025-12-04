@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>CO360 PDF Viewer</title>
+  <link rel="stylesheet" href="./viewer.css">
+</head>
+<body>
+  <div class="toolbar">
+    <div class="title" id="vTitle">Documento</div>
+    <button class="btn" id="btnOpen">Abrir...</button>
+    <div class="sep"></div>
+    <button class="btn" id="btnZoomOut">-</button>
+    <span class="page-info" id="zoomInfo">100%</span>
+    <button class="btn" id="btnZoomIn">+</button>
+    <div class="sep"></div>
+    <button class="btn" id="btnPrev">Anterior</button>
+    <span class="page-info" id="pageInfo">—</span>
+    <button class="btn" id="btnNext">Siguiente</button>
+  </div>
+
+  <div class="viewer" id="viewer">
+    <canvas class="page" id="pdfCanvas"></canvas>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window['pdfjsLib']) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+  <script src="./viewer.js"></script>
+</body>
+</html>
