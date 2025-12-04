@@ -1463,8 +1463,7 @@ if (window.jQuery) {
                         },
                         $row['per_post']
                     );
-                    $per_post_export = $per_post_lines ? implode( "
-", $per_post_lines ) : '—';
+                    $per_post_export = $per_post_lines ? implode( "\n", $per_post_lines ) : '—';
                     $per_post_html   = $per_post_lines ? implode( '<br>', array_map( 'esc_html', $per_post_lines ) ) : '—';
                 ?>
                 <tr>
@@ -1503,9 +1502,8 @@ if (window.jQuery) {
                 exportOptions: {
                   columns: ':visible',
                   format: {
-                    body: function ( data, row, col ) {
-                      var text = typeof data === 'string' ? data.replace(/<br\s*\/?>/gi, '
-').replace(/<[^>]+>/g,'').trim() : data;
+                      body: function ( data, row, col ) {
+                        var text = typeof data === 'string' ? data.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim() : data;
                       var cell = table.cell(row, col).node();
                       var extra = $(cell).data('export');
                       if (extra) { text = extra; }
@@ -1520,9 +1518,8 @@ if (window.jQuery) {
                 exportOptions: {
                   columns: ':visible',
                   format: {
-                    body: function ( data, row, col ) {
-                      var text = typeof data === 'string' ? data.replace(/<br\s*\/?>/gi, '
-').replace(/<[^>]+>/g,'').trim() : data;
+                      body: function ( data, row, col ) {
+                        var text = typeof data === 'string' ? data.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim() : data;
                       var cell = table.cell(row, col).node();
                       var extra = $(cell).data('export');
                       if (extra) { text = extra; }
