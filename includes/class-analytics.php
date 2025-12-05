@@ -1096,9 +1096,9 @@ if (window.jQuery) {
               <thead>
                 <tr>
                   <th>Título</th>
-                  <th>Total Visualizaciones Slide Kit</th>
-                  <th>Total Visualizaciones Highlights</th>
-                  <th>Total Descargas PPT</th>
+                  <th class="co360-num-col">Total Visualizaciones Slide Kit</th>
+                  <th class="co360-num-col">Total Visualizaciones Highlights</th>
+                  <th class="co360-num-col">Total Descargas PPT</th>
                 </tr>
               </thead>
               <tbody>
@@ -1455,6 +1455,7 @@ if (window.jQuery) {
             <table id="co360UserExportTable" class="co360-table display">
               <thead>
                 <tr>
+                  <th class="co360-col-expand no-export"></th>
                   <th>Nombre</th>
                   <th>Apellidos</th>
                   <th>Email</th>
@@ -1465,19 +1466,48 @@ if (window.jQuery) {
                   <th>Total Visualizaciones Slide Kit</th>
                   <th>Total Visualizaciones Highlights</th>
                   <th>Total Descargas PPT</th>
-                  <?php foreach ( $all_posts as $title ) : ?>
-                    <th class="co360-post-col"><?php echo esc_html( $title ); ?></th>
-                  <?php endforeach; ?>
+                  <th class="co360-export-only">Detalle de presentaciones</th>
                 </tr>
               </thead>
               <tbody>
                 <?php foreach ( $stats as $row ) :
-                    $per_post_map = [];
+                    $per_post_map    = [];
+                    $per_post_sorted = [];
                     foreach ( $row['per_post'] as $p ) {
                         $per_post_map[ $p['post_id'] ] = $p;
                     }
+
+                    foreach ( $all_posts as $post_id => $title ) {
+                        if ( isset( $per_post_map[ $post_id ] ) ) {
+                            $p     = $per_post_map[ $post_id ];
+                            $total = (int) $p['view_slidekit'] + (int) $p['view_highlights'] + (int) $p['download_ppt'];
+                            $per_post_sorted[] = [
+                                'title'      => $title,
+                                'slidekit'   => (int) $p['view_slidekit'],
+                                'highlights' => (int) $p['view_highlights'],
+                                'ppt'        => (int) $p['download_ppt'],
+                                'total'      => $total,
+                            ];
+                        }
+                    }
+
+                    $detail_export_lines = [];
+                    foreach ( $per_post_sorted as $p ) {
+                        $detail_export_lines[] = sprintf(
+                            '%s — SK: %d | HL: %d | PPT: %d | Total: %d',
+                            $p['title'],
+                            $p['slidekit'],
+                            $p['highlights'],
+                            $p['ppt'],
+                            $p['total']
+                        );
+                    }
+
+                    $detail_json   = wp_json_encode( $per_post_sorted );
+                    $detail_export = implode( "\n", $detail_export_lines );
                 ?>
                 <tr>
+                  <td class="dt-control" data-per-post="<?php echo esc_attr( $detail_json ); ?>" data-export="<?php echo esc_attr( $detail_export ?: '—' ); ?>" aria-label="Mostrar detalle"></td>
                   <td><?php echo esc_html( $row['first_name'] ); ?></td>
                   <td><?php echo esc_html( $row['last_name'] ); ?></td>
                   <td><?php echo esc_html( $row['email'] ); ?></td>
@@ -1485,34 +1515,10 @@ if (window.jQuery) {
                   <?php foreach ( array_keys( $meta_labels ) as $meta_key ) : ?>
                     <td><?php echo esc_html( $row['meta'][ $meta_key ] ); ?></td>
                   <?php endforeach; ?>
-                  <td><?php echo (int) $row['totals']['view_slidekit']; ?></td>
-                  <td><?php echo (int) $row['totals']['view_highlights']; ?></td>
-                  <td><?php echo (int) $row['totals']['download_ppt']; ?></td>
-                  <?php foreach ( $all_posts as $post_id => $title ) :
-                    $has_data = isset( $per_post_map[ $post_id ] );
-                    $p        = $has_data ? $per_post_map[ $post_id ] : null;
-                    $total    = $has_data ? ( $p['view_slidekit'] + $p['view_highlights'] + $p['download_ppt'] ) : 0;
-                    $export   = $has_data ? sprintf(
-                        'Slide Kit: %d | Highlights: %d | PPT: %d | Total: %d',
-                        $p['view_slidekit'],
-                        $p['view_highlights'],
-                        $p['download_ppt'],
-                        $total
-                    ) : '—';
-                  ?>
-                  <td class="co360-post-cell" data-export="<?php echo esc_attr( $export ); ?>">
-                    <?php if ( $has_data ) : ?>
-                      <div class="co360-post-metrics">
-                        <span class="co360-badge">SK: <?php echo (int) $p['view_slidekit']; ?></span>
-                        <span class="co360-badge">HL: <?php echo (int) $p['view_highlights']; ?></span>
-                        <span class="co360-badge">PPT: <?php echo (int) $p['download_ppt']; ?></span>
-                        <span class="co360-badge co360-badge--total">Total: <?php echo (int) $total; ?></span>
-                      </div>
-                    <?php else : ?>
-                      —
-                    <?php endif; ?>
-                  </td>
-                  <?php endforeach; ?>
+                  <td class="co360-num"><?php echo (int) $row['totals']['view_slidekit']; ?></td>
+                  <td class="co360-num"><?php echo (int) $row['totals']['view_highlights']; ?></td>
+                  <td class="co360-num"><?php echo (int) $row['totals']['download_ppt']; ?></td>
+                  <td class="co360-export-only" data-export="<?php echo esc_attr( $detail_export ?: '—' ); ?>">Detalle presentaciones</td>
                 </tr>
                 <?php endforeach; ?>
               </tbody>
@@ -1529,6 +1535,11 @@ if (window.jQuery) {
             scrollX: true,
             pageLength: 25,
             lengthMenu: [[10,25,50,100,-1],[10,25,50,100,'Todos']],
+            order: [[1, 'asc']],
+            columnDefs: [
+              { targets: 0, className: 'dt-control', orderable: false, data: null, defaultContent: '' },
+              { targets: 'co360-export-only', visible: false, searchable: false }
+            ],
             language: {
               url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json'
             },
@@ -1537,7 +1548,7 @@ if (window.jQuery) {
                 extend: 'csvHtml5',
                 title: 'CO360 Analítica Usuarios',
                 exportOptions: {
-                  columns: ':visible',
+                  columns: ':visible:not(.no-export), .co360-export-only',
                   format: {
                       body: function ( data, row, col ) {
                         var text = typeof data === 'string' ? data.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim() : data;
@@ -1553,7 +1564,7 @@ if (window.jQuery) {
                 extend: 'excelHtml5',
                 title: 'CO360 Analítica Usuarios',
                 exportOptions: {
-                  columns: ':visible',
+                  columns: ':visible:not(.no-export), .co360-export-only',
                   format: {
                       body: function ( data, row, col ) {
                         var text = typeof data === 'string' ? data.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim() : data;
@@ -1570,6 +1581,47 @@ if (window.jQuery) {
                 text: 'Columnas'
               }
             ]
+          });
+
+          function renderChild(perPost){
+            var items = perPost || [];
+            if (typeof items === 'string') {
+              try { items = JSON.parse(items); } catch (e) { items = []; }
+            }
+
+            if (!items.length) {
+              return '<div class="co360-child-empty">Sin presentaciones registradas.</div>';
+            }
+
+            var rows = items.map(function(p){
+              return '<tr>' +
+                       '<td>' + (p.title || '') + '</td>' +
+                       '<td class="co360-num">' + (p.slidekit || 0) + '</td>' +
+                       '<td class="co360-num">' + (p.highlights || 0) + '</td>' +
+                       '<td class="co360-num">' + (p.ppt || 0) + '</td>' +
+                       '<td class="co360-num co360-num--total">' + (p.total || 0) + '</td>' +
+                     '</tr>';
+            }).join('');
+
+            return '<div class="co360-child-wrap">' +
+                     '<table class="co360-child-table">' +
+                       '<thead><tr><th>Presentación</th><th>Slide Kit</th><th>Highlights</th><th>PPT</th><th>Total</th></tr></thead>' +
+                       '<tbody>' + rows + '</tbody>' +
+                     '</table>' +
+                   '</div>';
+          }
+
+          $('#co360UserExportTable tbody').on('click', 'td.dt-control', function(){
+            var tr  = $(this).closest('tr');
+            var row = table.row(tr);
+            if (row.child.isShown()) {
+              row.child.hide();
+              tr.removeClass('shown');
+            } else {
+              var perPost = $(this).data('per-post');
+              row.child(renderChild(perPost)).show();
+              tr.addClass('shown');
+            }
           });
         });
         </script>

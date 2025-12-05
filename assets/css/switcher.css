@@ -112,6 +112,20 @@
 .co360-badge{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:#eef2ff; color:#312e81; font-weight:600; font-size:13px; }
 .co360-badge::before{ content:"•"; display:block; font-size:18px; line-height:1; color:#4f46e5; }
 .co360-badge--total{ background:#fef3c7; color:#92400e; }
+.co360-col-expand{ width:38px; }
+.co360-table td.dt-control{ text-align:center !important; cursor:pointer; width:38px; }
+.co360-table td.dt-control::before{ content:'+'; font-weight:700; color:#1f2937; }
+.co360-table tr.shown td.dt-control::before{ content:'–'; }
+.co360-export-only{ display:none; }
+.co360-child-wrap{ padding:10px 12px 14px; background:#f9fafb; border-top:1px solid #e5e7eb; }
+.co360-child-table{ width:100%; border-collapse:collapse; font-size:14px; }
+.co360-child-table th{ text-align:left; padding:8px 10px; background:#eef2ff; color:#1f2937; border-bottom:1px solid #e5e7eb; }
+.co360-child-table td{ padding:8px 10px; border-bottom:1px solid #eef2f7; }
+.co360-num{ text-align:right; font-variant-numeric: tabular-nums; }
+.co360-num--total{ font-weight:700; color:#92400e; }
+.co360-child-empty{ padding:10px 12px; color:#6b7280; }
+#co360UserExportTable thead th, #co360UserExportTable tbody td{ text-align:left; }
+#co360UserExportTable thead th.co360-num-col{ text-align:right; }
 
 /* =========================
    LEADERBOARDS
