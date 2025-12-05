@@ -1466,7 +1466,11 @@ if (window.jQuery) {
                   <th>Total Visualizaciones Slide Kit</th>
                   <th>Total Visualizaciones Highlights</th>
                   <th>Total Descargas PPT</th>
-                  <th class="co360-export-only">Detalle de presentaciones</th>
+                  <th class="co360-export-only">Presentación</th>
+                  <th class="co360-export-only">Slide Kit (detalle)</th>
+                  <th class="co360-export-only">Highlights (detalle)</th>
+                  <th class="co360-export-only">PPT (detalle)</th>
+                  <th class="co360-export-only">Total presentación</th>
                 </tr>
               </thead>
               <tbody>
@@ -1518,7 +1522,11 @@ if (window.jQuery) {
                   <td class="co360-num"><?php echo (int) $row['totals']['view_slidekit']; ?></td>
                   <td class="co360-num"><?php echo (int) $row['totals']['view_highlights']; ?></td>
                   <td class="co360-num"><?php echo (int) $row['totals']['download_ppt']; ?></td>
-                  <td class="co360-export-only" data-export="<?php echo esc_attr( $detail_export ?: '—' ); ?>">Detalle presentaciones</td>
+                  <td class="co360-export-only co360-export-presentacion">—</td>
+                  <td class="co360-export-only co360-export-sk">—</td>
+                  <td class="co360-export-only co360-export-hl">—</td>
+                  <td class="co360-export-only co360-export-ppt">—</td>
+                  <td class="co360-export-only co360-export-total">—</td>
                 </tr>
                 <?php endforeach; ?>
               </tbody>
@@ -1528,11 +1536,29 @@ if (window.jQuery) {
         </div>
         <script>
         jQuery(function($){
+          var exportChildRowNumbers = [];
+
           function buildChildRowsForExport(data){
+            exportChildRowNumbers = [];
+
             var rowNodes = table.rows({ search: 'applied', order: 'applied' }).nodes().toArray();
             var headers  = data.header || [];
             var cols     = headers.length;
             var body     = [];
+
+            var titleIdx = headers.indexOf('Presentación');
+            var skIdx    = headers.indexOf('Slide Kit (detalle)');
+            var hlIdx    = headers.indexOf('Highlights (detalle)');
+            var pptIdx   = headers.indexOf('PPT (detalle)');
+            var totIdx   = headers.indexOf('Total presentación');
+
+            if (titleIdx === -1 || skIdx === -1 || hlIdx === -1 || pptIdx === -1 || totIdx === -1) {
+              titleIdx = cols - 5;
+              skIdx    = cols - 4;
+              hlIdx    = cols - 3;
+              pptIdx   = cols - 2;
+              totIdx   = cols - 1;
+            }
 
             data.body.forEach(function(row, idx){
               body.push(row);
@@ -1549,17 +1575,39 @@ if (window.jQuery) {
 
               perPost.forEach(function(p){
                 var child = new Array(cols).fill('');
-                child[0]  = '↳';
-                child[1]  = p.title || '';
-                child[cols - 1] = 'SK: ' + (p.slidekit || 0)
-                                  + ' | HL: ' + (p.highlights || 0)
-                                  + ' | PPT: ' + (p.ppt || 0)
-                                  + ' | Total: ' + (p.total || 0);
+                child[titleIdx] = p.title || '';
+                child[skIdx]    = p.slidekit || 0;
+                child[hlIdx]    = p.highlights || 0;
+                child[pptIdx]   = p.ppt || 0;
+                child[totIdx]   = p.total || 0;
+
                 body.push(child);
+                exportChildRowNumbers.push(2 + body.length - 1);
               });
             });
 
             data.body = body;
+          }
+
+          function applyOutlineToSheet(xlsx){
+            if (!exportChildRowNumbers.length) return;
+
+            var sheet  = xlsx.xl.worksheets['sheet1.xml'];
+            var $sheet = $(sheet);
+
+            var sheetPr = $sheet.find('sheetPr');
+            if (!sheetPr.length) {
+              $sheet.prepend('<sheetPr><outlinePr summaryBelow="1" summaryRight="1"/></sheetPr>');
+            } else if (!sheetPr.find('outlinePr').length) {
+              sheetPr.append('<outlinePr summaryBelow="1" summaryRight="1"/>');
+            }
+
+            exportChildRowNumbers.forEach(function(r){
+              $sheet.find('row[r="' + r + '"]').attr('outlineLevel', '1');
+            });
+
+            var serializer = new XMLSerializer();
+            xlsx.xl.worksheets['sheet1.xml'] = serializer.serializeToString($sheet[0]);
           }
 
           var table = $('#co360UserExportTable').DataTable({
@@ -1614,6 +1662,9 @@ if (window.jQuery) {
                   customizeData: function(data){
                     buildChildRowsForExport(data);
                   }
+                },
+                customize: function(xlsx){
+                  applyOutlineToSheet(xlsx);
                 }
               },
               {
