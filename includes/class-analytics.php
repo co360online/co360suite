@@ -480,7 +480,7 @@ public function register_assets(){
     );
     wp_register_script(
         'co360-jszip',
-        'https://cdn.datatables.net/buttons/3.1.2/jszip.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
         [],
         '3.10.1',
         false
