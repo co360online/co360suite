@@ -1541,73 +1541,81 @@ if (window.jQuery) {
           function buildChildRowsForExport(data){
             exportChildRowNumbers = [];
 
-            var rowNodes = table.rows({ search: 'applied', order: 'applied' }).nodes().toArray();
-            var headers  = data.header || [];
-            var cols     = headers.length;
-            var body     = [];
+            try {
+              var rowNodes = table.rows({ search: 'applied', order: 'applied' }).nodes().toArray();
+              var headers  = data.header || [];
+              var cols     = headers.length;
+              var body     = [];
 
-            var titleIdx = headers.indexOf('Presentación');
-            var skIdx    = headers.indexOf('Slide Kit (detalle)');
-            var hlIdx    = headers.indexOf('Highlights (detalle)');
-            var pptIdx   = headers.indexOf('PPT (detalle)');
-            var totIdx   = headers.indexOf('Total presentación');
+              var titleIdx = headers.indexOf('Presentación');
+              var skIdx    = headers.indexOf('Slide Kit (detalle)');
+              var hlIdx    = headers.indexOf('Highlights (detalle)');
+              var pptIdx   = headers.indexOf('PPT (detalle)');
+              var totIdx   = headers.indexOf('Total presentación');
 
-            if (titleIdx === -1 || skIdx === -1 || hlIdx === -1 || pptIdx === -1 || totIdx === -1) {
-              titleIdx = cols - 5;
-              skIdx    = cols - 4;
-              hlIdx    = cols - 3;
-              pptIdx   = cols - 2;
-              totIdx   = cols - 1;
-            }
-
-            data.body.forEach(function(row, idx){
-              body.push(row);
-
-              var node    = rowNodes[idx];
-              var control = node ? $(node).find('td.dt-control') : null;
-              var perPost = control ? control.data('per-post') : [];
-
-              if (typeof perPost === 'string') {
-                try { perPost = JSON.parse(perPost); } catch (e) { perPost = []; }
+              if (titleIdx === -1 || skIdx === -1 || hlIdx === -1 || pptIdx === -1 || totIdx === -1) {
+                titleIdx = cols - 5;
+                skIdx    = cols - 4;
+                hlIdx    = cols - 3;
+                pptIdx   = cols - 2;
+                totIdx   = cols - 1;
               }
 
-              if (!perPost || !perPost.length) return;
+              data.body.forEach(function(row, idx){
+                body.push(row);
 
-              perPost.forEach(function(p){
-                var child = new Array(cols).fill('');
-                child[titleIdx] = p.title || '';
-                child[skIdx]    = p.slidekit || 0;
-                child[hlIdx]    = p.highlights || 0;
-                child[pptIdx]   = p.ppt || 0;
-                child[totIdx]   = p.total || 0;
+                var node    = rowNodes[idx];
+                var control = node ? $(node).find('td.dt-control') : null;
+                var perPost = control ? control.data('per-post') : [];
 
-                body.push(child);
-                exportChildRowNumbers.push(2 + body.length - 1);
+                if (typeof perPost === 'string') {
+                  try { perPost = JSON.parse(perPost); } catch (e) { perPost = []; }
+                }
+
+                if (!perPost || !perPost.length) return;
+
+                perPost.forEach(function(p){
+                  var child = new Array(cols).fill('');
+                  child[titleIdx] = p.title || '';
+                  child[skIdx]    = p.slidekit || 0;
+                  child[hlIdx]    = p.highlights || 0;
+                  child[pptIdx]   = p.ppt || 0;
+                  child[totIdx]   = p.total || 0;
+
+                  body.push(child);
+                  exportChildRowNumbers.push(2 + body.length - 1);
+                });
               });
-            });
 
-            data.body = body;
+              data.body = body;
+            } catch (err) {
+              console.error('No se pudieron preparar las filas hijas para exportar', err);
+            }
           }
 
           function applyOutlineToSheet(xlsx){
-            if (!exportChildRowNumbers.length) return;
+            try {
+              if (!exportChildRowNumbers.length || !xlsx || !xlsx.xl || !xlsx.xl.worksheets || !xlsx.xl.worksheets['sheet1.xml']) return;
 
-            var sheet  = xlsx.xl.worksheets['sheet1.xml'];
-            var $sheet = $(sheet);
+              var sheet  = xlsx.xl.worksheets['sheet1.xml'];
+              var $sheet = $(sheet);
 
-            var sheetPr = $sheet.find('sheetPr');
-            if (!sheetPr.length) {
-              $sheet.prepend('<sheetPr><outlinePr summaryBelow="1" summaryRight="1"/></sheetPr>');
-            } else if (!sheetPr.find('outlinePr').length) {
-              sheetPr.append('<outlinePr summaryBelow="1" summaryRight="1"/>');
+              var sheetPr = $sheet.find('sheetPr');
+              if (!sheetPr.length) {
+                $sheet.prepend('<sheetPr><outlinePr summaryBelow="1" summaryRight="1"/></sheetPr>');
+              } else if (!sheetPr.find('outlinePr').length) {
+                sheetPr.append('<outlinePr summaryBelow="1" summaryRight="1"/>');
+              }
+
+              exportChildRowNumbers.forEach(function(r){
+                $sheet.find('row[r="' + r + '"]').attr('outlineLevel', '1');
+              });
+
+              var serializer = new XMLSerializer();
+              xlsx.xl.worksheets['sheet1.xml'] = serializer.serializeToString($sheet[0]);
+            } catch (err) {
+              console.error('No se pudo aplicar el outline al Excel exportado', err);
             }
-
-            exportChildRowNumbers.forEach(function(r){
-              $sheet.find('row[r="' + r + '"]').attr('outlineLevel', '1');
-            });
-
-            var serializer = new XMLSerializer();
-            xlsx.xl.worksheets['sheet1.xml'] = serializer.serializeToString($sheet[0]);
           }
 
           var table = $('#co360UserExportTable').DataTable({
