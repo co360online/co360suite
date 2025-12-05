@@ -485,6 +485,11 @@ public function register_assets(){
         '3.10.1',
         true
     );
+    wp_add_inline_script(
+        'co360-jszip',
+        'window.JSZip = window.JSZip || (typeof JSZip !== "undefined" ? JSZip : undefined);',
+        'after'
+    );
     wp_register_script(
         'co360-datatables-buttons-html5',
         'https://cdn.datatables.net/buttons/3.1.2/js/buttons.html5.min.js',
