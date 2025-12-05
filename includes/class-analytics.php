@@ -478,16 +478,44 @@ public function register_assets(){
         '3.1.2',
         true
     );
+    $jszip_urls = wp_json_encode([
+        'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+        'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
+        'https://unpkg.com/jszip@3.10.1/dist/jszip.min.js',
+    ]);
+
     wp_register_script(
         'co360-jszip',
-        'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+        '',
         [],
         '3.10.1',
-        false
+        true
     );
     wp_add_inline_script(
         'co360-jszip',
-        'window.JSZip = window.JSZip || (typeof JSZip !== "undefined" ? JSZip : undefined);',
+        "(() => {\n"
+        . "  if (window.JSZip) return;\n"
+        . "  var urls = {$jszip_urls}.slice();\n"
+        . "  var tryNext = function(){\n"
+        . "    if (window.JSZip || urls.length === 0) return;\n"
+        . "    var u = urls.shift();\n"
+        . "    var s = document.createElement('script');\n"
+        . "    s.src = u;\n"
+        . "    s.referrerPolicy = 'no-referrer';\n"
+        . "    s.onload = function(){\n"
+        . "      if (!window.JSZip && typeof JSZip !== 'undefined') { window.JSZip = JSZip; }\n"
+        . "      if (!window.JSZip) { tryNext(); }\n"
+        . "    };\n"
+        . "    s.onerror = tryNext;\n"
+        . "    document.head.appendChild(s);\n"
+        . "  };\n"
+        . "  tryNext();\n"
+        . "})();",
+        'after'
+    );
+    wp_add_inline_script(
+        'co360-jszip',
+        'if (!window.JSZip && typeof JSZip !== "undefined") { window.JSZip = JSZip; }',
         'after'
     );
     wp_register_script(
