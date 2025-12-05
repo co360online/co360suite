@@ -1528,6 +1528,40 @@ if (window.jQuery) {
         </div>
         <script>
         jQuery(function($){
+          function buildChildRowsForExport(data){
+            var rowNodes = table.rows({ search: 'applied', order: 'applied' }).nodes().toArray();
+            var headers  = data.header || [];
+            var cols     = headers.length;
+            var body     = [];
+
+            data.body.forEach(function(row, idx){
+              body.push(row);
+
+              var node    = rowNodes[idx];
+              var control = node ? $(node).find('td.dt-control') : null;
+              var perPost = control ? control.data('per-post') : [];
+
+              if (typeof perPost === 'string') {
+                try { perPost = JSON.parse(perPost); } catch (e) { perPost = []; }
+              }
+
+              if (!perPost || !perPost.length) return;
+
+              perPost.forEach(function(p){
+                var child = new Array(cols).fill('');
+                child[0]  = '↳';
+                child[1]  = p.title || '';
+                child[cols - 1] = 'SK: ' + (p.slidekit || 0)
+                                  + ' | HL: ' + (p.highlights || 0)
+                                  + ' | PPT: ' + (p.ppt || 0)
+                                  + ' | Total: ' + (p.total || 0);
+                body.push(child);
+              });
+            });
+
+            data.body = body;
+          }
+
           var table = $('#co360UserExportTable').DataTable({
             dom: 'Blfrtip',
             colReorder: false,
@@ -1557,6 +1591,9 @@ if (window.jQuery) {
                       if (extra) { text = extra; }
                       return text;
                     }
+                  },
+                  customizeData: function(data){
+                    buildChildRowsForExport(data);
                   }
                 }
               },
@@ -1573,6 +1610,9 @@ if (window.jQuery) {
                       if (extra) { text = extra; }
                       return text;
                     }
+                  },
+                  customizeData: function(data){
+                    buildChildRowsForExport(data);
                   }
                 }
               },
