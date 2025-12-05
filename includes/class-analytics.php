@@ -478,15 +478,15 @@ public function register_assets(){
         '3.1.2',
         true
     );
+    $jszip_primary = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
     $jszip_urls = wp_json_encode([
-        'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
         'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
         'https://unpkg.com/jszip@3.10.1/dist/jszip.min.js',
     ]);
 
     wp_register_script(
         'co360-jszip',
-        '',
+        $jszip_primary,
         [],
         '3.10.1',
         true
