@@ -1459,7 +1459,7 @@ if (window.jQuery) {
                   <th>Nombre</th>
                   <th>Apellidos</th>
                   <th>Email</th>
-                  <th>Fecha de registro</th>
+                  <th>Registrado</th>
                   <?php foreach ( $meta_labels as $label ) : ?>
                     <th><?php echo esc_html( $label ); ?></th>
                   <?php endforeach; ?>
@@ -2485,7 +2485,7 @@ public function handle_remove_exclusions(){
                 'first_name' => get_user_meta( $uid, 'first_name', true ),
                 'last_name'  => get_user_meta( $uid, 'last_name', true ),
                 'email'      => $u->user_email,
-                'registered' => mysql2date( 'Y-m-d', $u->user_registered ),
+                'registered' => mysql2date( 'd/m/Y', $u->user_registered ),
                 'meta'       => $meta,
                 'totals'     => [
                     'view_slidekit'   => (int) ( $totals[ $uid ]['view_slidekit'] ?? 0 ),
