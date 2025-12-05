@@ -437,7 +437,7 @@ public function register_assets(){
                 . '}).then(function(r){return r.blob();}).then(function(b){'
                     . 'var a=document.createElement("a");'
                     . 'a.href=URL.createObjectURL(b);'
-                    . 'a.download="co360_export."+(fmt==="xls"?"xls":"csv");'
+                    . 'a.download="alteragora_export."+(fmt==="xls"?"xls":"csv");'
                     . 'document.body.appendChild(a);'
                     . 'a.click();'
                     . 'a.remove();'
@@ -744,7 +744,7 @@ public function register_assets(){
         $terms = sanitize_text_field( (string) $req->get_param('term_ids') );
 
         $now   = date('Ymd_His');
-        $filename = "co360_export_{$scope}_{$now}.csv";
+        $filename = "alteragora_export_{$scope}_{$now}.csv";
 
         if ($scope === 'global') {
             // aplica rango + taxonomía si vienen
@@ -989,14 +989,14 @@ if (window.jQuery) {
         url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json'
       },
       buttons: [
-        {
-          extend: 'csvHtml5',
-          title: 'Alter Agora Mi Panel',
+          {
+            extend: 'csvHtml5',
+            title: 'AlterAgora Mi Panel',
           exportOptions: { columns: ':visible' }
         },
-        {
-          extend: 'excelHtml5',
-          title: 'Alter Agora Mi Panel',
+          {
+            extend: 'excelHtml5',
+            title: 'AlterAgora Mi Panel',
           exportOptions: { columns: ':visible' }
         },
         {
@@ -1343,14 +1343,14 @@ if (window.jQuery) {
                 url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json'
               },
               buttons: [
-                {
-                  extend: 'csvHtml5',
-                  title: 'Alter Agora Estadísticas Generales',
+                  {
+                    extend: 'csvHtml5',
+                    title: 'AlterAgora Estadísticas Generales',
                   exportOptions: { columns: ':visible' }
                 },
-                {
-                  extend: 'excelHtml5',
-                  title: 'Alter Agora Estadísticas Generales',
+                  {
+                    extend: 'excelHtml5',
+                    title: 'AlterAgora Estadísticas Generales',
                   exportOptions: { columns: ':visible' }
                 },
                 {
@@ -1634,9 +1634,9 @@ if (window.jQuery) {
               url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json'
             },
             buttons: [
-              {
-                extend: 'csvHtml5',
-                title: 'CO360 Analítica Usuarios',
+                {
+                  extend: 'csvHtml5',
+                  title: 'AlterAgora Analítica Usuarios',
                 exportOptions: {
                   columns: ':visible:not(.no-export), .co360-export-only',
                   format: {
@@ -1653,9 +1653,9 @@ if (window.jQuery) {
                   }
                 }
               },
-              {
-                extend: 'excelHtml5',
-                title: 'CO360 Analítica Usuarios',
+                {
+                  extend: 'excelHtml5',
+                  title: 'AlterAgora Analítica Usuarios',
                 exportOptions: {
                   columns: ':visible:not(.no-export), .co360-export-only',
                   format: {
@@ -1953,14 +1953,14 @@ if (window.jQuery && jQuery.fn.DataTable) {
       url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json'
     },
     buttons: [
-      {
-        extend: 'csvHtml5',
-        title: 'Alter Agora Estadísticas Usuario',
+        {
+          extend: 'csvHtml5',
+          title: 'AlterAgora Estadísticas Usuario',
         exportOptions: { columns: ':visible' }
       },
-      {
-        extend: 'excelHtml5',
-        title: 'Alter Agora Estadísticas Usuario',
+        {
+          extend: 'excelHtml5',
+          title: 'AlterAgora Estadísticas Usuario',
         exportOptions: { columns: ':visible' }
       },
       {
@@ -2040,7 +2040,7 @@ if (window.jQuery && jQuery.fn.DataTable) {
     }
     private function stream_csv_raw(){
         header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="co360_raw_'.date('Ymd_His').'.csv"');
+        header('Content-Disposition: attachment; filename="alteragora_raw_'.date('Ymd_His').'.csv"');
         $out = fopen('php://output','w');
         fputcsv($out, ['Fecha','User ID','Post ID','Acción','Source','IP','Session']);
         global $wpdb; $table=$wpdb->prefix.self::TABLE;
