@@ -1277,9 +1277,9 @@ if (window.jQuery) {
                 const cards = document.getElementById('co360Totals');
                 if (cards) {
                   cards.innerHTML = `
-                    <div class="co360-card"><strong>Total Slide Kit</strong><span>${(tot.view_slidekit||0)}</span></div>
-                    <div class="co360-card"><strong>Total Highlights</strong><span>${(tot.view_highlights||0)}</span></div>
-                    <div class="co360-card"><strong>Total PPT</strong><span>${(tot.download_ppt||0)}</span></div>`;
+                    <div class="co360-card"><strong>Total visualizaciones slide kit</strong><span>${(tot.view_slidekit||0)}</span></div>
+                    <div class="co360-card"><strong>Total visualizaciones highlights</strong><span>${(tot.view_highlights||0)}</span></div>
+                    <div class="co360-card"><strong>Total descargas PPT</strong><span>${(tot.download_ppt||0)}</span></div>`;
                 }
                 const rows = payload.per_post||[];
                 window.CO360_CHART_DATA = window.CO360_CHART_DATA||{};
