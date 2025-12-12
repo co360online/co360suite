@@ -17,6 +17,7 @@ class CO360_Suite_Analytics {
         add_action('rest_api_init',      [$this,'register_rest']);
         add_action('admin_menu',         [$this,'admin_menu']);
         add_action('admin_post_co360_export_csv', [$this,'handle_export_csv']);
+        add_action('admin_post_co360_user_export', [$this,'handle_user_export']);
         add_action('wp_ajax_co360_user_suggest',      [$this,'ajax_user_suggest']);
         add_action('wp_ajax_nopriv_co360_user_suggest', [$this,'ajax_user_suggest']); // si quieres permitir a no logueados, quítalo si no
         
@@ -32,6 +33,7 @@ class CO360_Suite_Analytics {
         add_shortcode('co360_user_analytics',   [$this,'sc_user_analytics']);
         add_shortcode('co360_global_analytics', [$this,'sc_global_analytics']);
         add_shortcode('co360_user_insights',    [$this,'sc_user_insights']);
+        add_shortcode('co360_user_export',      [$this,'sc_user_export']);
         add_shortcode('co360_pdf_viewer',       [$this,'sc_pdf_viewer']);
         add_shortcode('co360_ppt_download',     [$this,'sc_ppt_download']);
 
@@ -870,6 +872,39 @@ public function register_assets(){
         return $GLOBALS['co360_suite_pdfviewer']->shortcode_pdf_viewer($atts);
     }
 
+    public function sc_user_export($atts = []) {
+        if ( ! is_user_logged_in() ) {
+            return '<p>Debes iniciar sesión.</p>';
+        }
+
+        $a = shortcode_atts([
+            'label' => 'Exportar mi actividad (CSV)',
+            'class' => 'button button-primary'
+        ], $atts);
+
+        $action = esc_url( admin_url('admin-post.php') );
+
+        ob_start(); ?>
+        <form method="post" action="<?php echo $action; ?>" class="co360-user-export" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+            <?php wp_nonce_field('co360_user_export'); ?>
+            <input type="hidden" name="action" value="co360_user_export">
+
+            <label style="display:flex;flex-direction:column;gap:4px;">
+                <span>Desde</span>
+                <input type="date" name="date_from">
+            </label>
+
+            <label style="display:flex;flex-direction:column;gap:4px;">
+                <span>Hasta</span>
+                <input type="date" name="date_to">
+            </label>
+
+            <button type="submit" class="<?php echo esc_attr( $a['class'] ); ?>"><?php echo esc_html( $a['label'] ); ?></button>
+        </form>
+        <?php
+        return ob_get_clean();
+    }
+
     /* ========== Paneles rápidos ========== */
      public function sc_user_analytics(){
      if ( ! is_user_logged_in() ) {
@@ -903,9 +938,9 @@ public function register_assets(){
        </h3>
 
        <div class="co360-cards">
-         <div class="co360-card"><strong>Total Visualizaciones Slide Kit</strong><span><?php echo (int)($tot['view_slidekit'] ?? 0); ?></span></div>
-         <div class="co360-card"><strong>Total Visualizaciones Highlights</strong><span><?php echo (int)($tot['view_highlights'] ?? 0); ?></span></div>
-         <div class="co360-card"><strong>Total Descargas PPT</strong><span><?php echo (int)($tot['download_ppt'] ?? 0); ?></span></div>
+        <div class="co360-card"><strong>Total visualizaciones slide kit</strong><span><?php echo (int)($tot['view_slidekit'] ?? 0); ?></span></div>
+        <div class="co360-card"><strong>Total visualizaciones highlights</strong><span><?php echo (int)($tot['view_highlights'] ?? 0); ?></span></div>
+        <div class="co360-card"><strong>Total descargas PPT</strong><span><?php echo (int)($tot['download_ppt'] ?? 0); ?></span></div>
        </div>
 
        <div class="co360-chartbox" style="height:420px">
@@ -917,9 +952,9 @@ public function register_assets(){
            <thead>
              <tr>
                <th>Título</th>
-               <th>Total Visualizaciones Slide Kit</th>
-               <th>Total Visualizaciones Highlights</th>
-               <th>Total Descargas PPT</th>
+              <th>Total visualizaciones slide kit</th>
+              <th>Total visualizaciones highlights</th>
+              <th>Total descargas PPT</th>
              </tr>
            </thead>
            <tbody>
@@ -1081,9 +1116,9 @@ if (window.jQuery) {
           </div>
 
           <div class="co360-cards" id="co360Totals" style="margin-top:.5rem">
-            <div class="co360-card"><strong>Total Visualizaciones Slide Kit</strong><span><?php echo (int)($tot['view_slidekit']??0); ?></span></div>
-            <div class="co360-card"><strong>Total Visualizaciones Highlights</strong><span><?php echo (int)($tot['view_highlights']??0); ?></span></div>
-            <div class="co360-card"><strong>Total Descargas PPT</strong><span><?php echo (int)($tot['download_ppt']??0); ?></span></div>
+          <div class="co360-card"><strong>Total visualizaciones slide kit</strong><span><?php echo (int)($tot['view_slidekit']??0); ?></span></div>
+          <div class="co360-card"><strong>Total visualizaciones highlights</strong><span><?php echo (int)($tot['view_highlights']??0); ?></span></div>
+          <div class="co360-card"><strong>Total descargas PPT</strong><span><?php echo (int)($tot['download_ppt']??0); ?></span></div>
           </div>
 
           <div class="co360-chartbox" style="height:420px">
@@ -1095,9 +1130,9 @@ if (window.jQuery) {
               <thead>
                 <tr>
                   <th>Título</th>
-                  <th>Total Visualizaciones Slide Kit</th>
-                  <th>Total Visualizaciones Highlights</th>
-                  <th>Total Descargas PPT</th>
+                  <th>Total visualizaciones slide kit</th>
+                  <th>Total visualizaciones highlights</th>
+                  <th>Total descargas PPT</th>
                 </tr>
               </thead>
               <tbody>
@@ -1277,9 +1312,9 @@ if (window.jQuery) {
                 const cards = document.getElementById('co360Totals');
                 if (cards) {
                   cards.innerHTML = `
-                    <div class="co360-card"><strong>Total Slide Kit</strong><span>${(tot.view_slidekit||0)}</span></div>
-                    <div class="co360-card"><strong>Total Highlights</strong><span>${(tot.view_highlights||0)}</span></div>
-                    <div class="co360-card"><strong>Total PPT</strong><span>${(tot.download_ppt||0)}</span></div>`;
+                    <div class="co360-card"><strong>Total visualizaciones slide kit</strong><span>${(tot.view_slidekit||0)}</span></div>
+                    <div class="co360-card"><strong>Total visualizaciones highlights</strong><span>${(tot.view_highlights||0)}</span></div>
+                    <div class="co360-card"><strong>Total descargas PPT</strong><span>${(tot.download_ppt||0)}</span></div>`;
                 }
                 const rows = payload.per_post||[];
                 window.CO360_CHART_DATA = window.CO360_CHART_DATA||{};
@@ -1548,9 +1583,9 @@ public function sc_user_insights($atts=[]){
         // Tarjetas
         const cards = document.createElement('div'); cards.className='co360-cards';
         cards.innerHTML = `
-          <div class="co360-card"><strong>Total Visualizaciones Slide Kit</strong><span>${(payload.totals.view_slidekit||0)}</span></div>
-          <div class="co360-card"><strong>Total Visualizaciones Highlights</strong><span>${(payload.totals.view_highlights||0)}</span></div>
-          <div class="co360-card"><strong>Total Descargas PPT</strong><span>${(payload.totals.download_ppt||0)}</span></div>`;
+          <div class="co360-card"><strong>Total visualizaciones slide kit</strong><span>${(payload.totals.view_slidekit||0)}</span></div>
+          <div class="co360-card"><strong>Total visualizaciones highlights</strong><span>${(payload.totals.view_highlights||0)}</span></div>
+          <div class="co360-card"><strong>Total descargas PPT</strong><span>${(payload.totals.download_ppt||0)}</span></div>`;
         out.appendChild(cards);
 
         // Gráfica (altura 420px)
@@ -1598,7 +1633,7 @@ public function sc_user_insights($atts=[]){
         const wrap = document.createElement('div'); wrap.className = 'co360-table-wrap';
 const table = document.createElement('table');
 table.className = 'co360-table';
-table.id = 'co360UserInsightsTable';        table.innerHTML = '<thead><tr><th>Título</th><th>Total Visualizaciones Slide Kit</th><th>Total Visualizaciones Highlights</th><th>Total Descargas PPT</th></tr></thead><tbody>'
+table.id = 'co360UserInsightsTable';        table.innerHTML = '<thead><tr><th>Título</th><th>Total visualizaciones slide kit</th><th>Total visualizaciones highlights</th><th>Total descargas PPT</th></tr></thead><tbody>'
           + rows.map(r=>`<tr><td><a href="${r.permalink}" target="_blank">${r.title}</a></td><td>${r.view_slidekit||0}</td><td>${r.view_highlights||0}</td><td>${r.download_ppt||0}</td></tr>`).join('')
           + '</tbody>';
         wrap.appendChild(table);
@@ -1684,6 +1719,7 @@ if (window.jQuery && jQuery.fn.DataTable) {
                 <li><code>[co360_pdf_viewer url="..." type="slidekit|highlights"]</code></li>
                 <li><code>[co360_ppt_download url="..." label="Descargar PPT"]</code></li>
                 <li><code>[co360_user_analytics]</code>, <code>[co360_global_analytics]</code></li>
+                <li><code>[co360_user_export]</code> — exportación personal en CSV (rango opcional).</li>
             </ul>
             <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
                 <input type="hidden" name="action" value="co360_export_csv">
@@ -1705,6 +1741,49 @@ if (window.jQuery && jQuery.fn.DataTable) {
         $scope = sanitize_text_field($_POST['scope'] ?? '');
         check_admin_referer('co360_export_global');
         if ($scope==='raw') $this->stream_csv_raw();
+        exit;
+    }
+
+    public function handle_user_export(){
+        if ( ! is_user_logged_in() ) wp_die('No autorizado');
+        check_admin_referer('co360_user_export');
+
+        $uid  = get_current_user_id();
+        $from = isset($_POST['date_from']) ? sanitize_text_field( wp_unslash($_POST['date_from']) ) : '';
+        $to   = isset($_POST['date_to'])   ? sanitize_text_field( wp_unslash($_POST['date_to']) )   : '';
+
+        global $wpdb; $table = $wpdb->prefix . self::TABLE;
+        list($ds,$pp) = $this->build_date_sql($from,$to);
+
+        $sql = "SELECT created_at, post_id, action, source, INET6_NTOA(ip) ip, session_id
+                FROM {$table}
+                WHERE user_id = %d {$ds}
+                ORDER BY created_at DESC";
+
+        $params = array_merge([$uid], $pp);
+        $rows = $wpdb->get_results( $wpdb->prepare($sql, $params) );
+
+        nocache_headers();
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="co360_user_'.$uid.'_'.date('Ymd_His').'.csv"');
+
+        $out = fopen('php://output','w');
+        fwrite($out, "\xEF\xBB\xBF");
+        fputcsv($out, ['Fecha','Post ID','Título','Acción','Source','IP','Session']);
+
+        foreach ((array)$rows as $r){
+            fputcsv($out, [
+                $r->created_at,
+                (int)$r->post_id,
+                $r->post_id ? get_the_title((int)$r->post_id) : '',
+                $r->action,
+                $r->source,
+                (string)$r->ip,
+                $r->session_id
+            ]);
+        }
+
+        fclose($out);
         exit;
     }
     private function stream_csv_raw(){
