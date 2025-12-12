@@ -903,9 +903,9 @@ public function register_assets(){
        </h3>
 
        <div class="co360-cards">
-         <div class="co360-card"><strong>Total Visualizaciones Slide Kit</strong><span><?php echo (int)($tot['view_slidekit'] ?? 0); ?></span></div>
-         <div class="co360-card"><strong>Total Visualizaciones Highlights</strong><span><?php echo (int)($tot['view_highlights'] ?? 0); ?></span></div>
-         <div class="co360-card"><strong>Total Descargas PPT</strong><span><?php echo (int)($tot['download_ppt'] ?? 0); ?></span></div>
+        <div class="co360-card"><strong>Total visualizaciones slide kit</strong><span><?php echo (int)($tot['view_slidekit'] ?? 0); ?></span></div>
+        <div class="co360-card"><strong>Total visualizaciones highlights</strong><span><?php echo (int)($tot['view_highlights'] ?? 0); ?></span></div>
+        <div class="co360-card"><strong>Total descargas PPT</strong><span><?php echo (int)($tot['download_ppt'] ?? 0); ?></span></div>
        </div>
 
        <div class="co360-chartbox" style="height:420px">
@@ -917,9 +917,9 @@ public function register_assets(){
            <thead>
              <tr>
                <th>Título</th>
-               <th>Total Visualizaciones Slide Kit</th>
-               <th>Total Visualizaciones Highlights</th>
-               <th>Total Descargas PPT</th>
+              <th>Total visualizaciones slide kit</th>
+              <th>Total visualizaciones highlights</th>
+              <th>Total descargas PPT</th>
              </tr>
            </thead>
            <tbody>
@@ -1081,9 +1081,9 @@ if (window.jQuery) {
           </div>
 
           <div class="co360-cards" id="co360Totals" style="margin-top:.5rem">
-            <div class="co360-card"><strong>Total Visualizaciones Slide Kit</strong><span><?php echo (int)($tot['view_slidekit']??0); ?></span></div>
-            <div class="co360-card"><strong>Total Visualizaciones Highlights</strong><span><?php echo (int)($tot['view_highlights']??0); ?></span></div>
-            <div class="co360-card"><strong>Total Descargas PPT</strong><span><?php echo (int)($tot['download_ppt']??0); ?></span></div>
+          <div class="co360-card"><strong>Total visualizaciones slide kit</strong><span><?php echo (int)($tot['view_slidekit']??0); ?></span></div>
+          <div class="co360-card"><strong>Total visualizaciones highlights</strong><span><?php echo (int)($tot['view_highlights']??0); ?></span></div>
+          <div class="co360-card"><strong>Total descargas PPT</strong><span><?php echo (int)($tot['download_ppt']??0); ?></span></div>
           </div>
 
           <div class="co360-chartbox" style="height:420px">
@@ -1095,9 +1095,9 @@ if (window.jQuery) {
               <thead>
                 <tr>
                   <th>Título</th>
-                  <th>Total Visualizaciones Slide Kit</th>
-                  <th>Total Visualizaciones Highlights</th>
-                  <th>Total Descargas PPT</th>
+                  <th>Total visualizaciones slide kit</th>
+                  <th>Total visualizaciones highlights</th>
+                  <th>Total descargas PPT</th>
                 </tr>
               </thead>
               <tbody>
@@ -1548,9 +1548,9 @@ public function sc_user_insights($atts=[]){
         // Tarjetas
         const cards = document.createElement('div'); cards.className='co360-cards';
         cards.innerHTML = `
-          <div class="co360-card"><strong>Total Visualizaciones Slide Kit</strong><span>${(payload.totals.view_slidekit||0)}</span></div>
-          <div class="co360-card"><strong>Total Visualizaciones Highlights</strong><span>${(payload.totals.view_highlights||0)}</span></div>
-          <div class="co360-card"><strong>Total Descargas PPT</strong><span>${(payload.totals.download_ppt||0)}</span></div>`;
+          <div class="co360-card"><strong>Total visualizaciones slide kit</strong><span>${(payload.totals.view_slidekit||0)}</span></div>
+          <div class="co360-card"><strong>Total visualizaciones highlights</strong><span>${(payload.totals.view_highlights||0)}</span></div>
+          <div class="co360-card"><strong>Total descargas PPT</strong><span>${(payload.totals.download_ppt||0)}</span></div>`;
         out.appendChild(cards);
 
         // Gráfica (altura 420px)
@@ -1598,7 +1598,7 @@ public function sc_user_insights($atts=[]){
         const wrap = document.createElement('div'); wrap.className = 'co360-table-wrap';
 const table = document.createElement('table');
 table.className = 'co360-table';
-table.id = 'co360UserInsightsTable';        table.innerHTML = '<thead><tr><th>Título</th><th>Total Visualizaciones Slide Kit</th><th>Total Visualizaciones Highlights</th><th>Total Descargas PPT</th></tr></thead><tbody>'
+table.id = 'co360UserInsightsTable';        table.innerHTML = '<thead><tr><th>Título</th><th>Total visualizaciones slide kit</th><th>Total visualizaciones highlights</th><th>Total descargas PPT</th></tr></thead><tbody>'
           + rows.map(r=>`<tr><td><a href="${r.permalink}" target="_blank">${r.title}</a></td><td>${r.view_slidekit||0}</td><td>${r.view_highlights||0}</td><td>${r.download_ppt||0}</td></tr>`).join('')
           + '</tbody>';
         wrap.appendChild(table);
