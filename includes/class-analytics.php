@@ -7,6 +7,7 @@ class CO360_Suite_Analytics {
     const CAP_VIEW_USERS = 'co360_view_users';
     const VER = CO360_SUITE_VER;
     const EXCLUDED_OPT = 'co360_excluded_users'; // <-- AÑADIR
+    const HIDDEN_SUGGEST_EMAILS = ['soporte@comunicaciononline360.com'];
 
 
     public function __construct(){
@@ -32,6 +33,7 @@ class CO360_Suite_Analytics {
         add_shortcode('co360_user_analytics',   [$this,'sc_user_analytics']);
         add_shortcode('co360_global_analytics', [$this,'sc_global_analytics']);
         add_shortcode('co360_user_insights',    [$this,'sc_user_insights']);
+        add_shortcode('co360_user_export',      [$this,'sc_user_export']);
         add_shortcode('co360_pdf_viewer',       [$this,'sc_pdf_viewer']);
         add_shortcode('co360_ppt_download',     [$this,'sc_ppt_download']);
 
@@ -314,6 +316,14 @@ class CO360_Suite_Analytics {
         update_option(self::EXCLUDED_OPT, $ids, false);
     }
 
+    private function is_hidden_suggest_user($user){
+        $email = is_object($user) && isset($user->user_email) ? strtolower(trim((string) $user->user_email)) : '';
+        if ($email && in_array($email, self::HIDDEN_SUGGEST_EMAILS, true)) {
+            return true;
+        }
+        return false;
+    }
+
     /** Devuelve [sql, params] para excluir user_id en consultas globales */
     private function build_excluded_sql(){
         $ids = $this->get_excluded_user_ids();
@@ -348,6 +358,9 @@ class CO360_Suite_Analytics {
         $uq = new WP_User_Query( $args );
         $users = [];
         foreach ( (array) $uq->get_results() as $u ) {
+            if ( $this->is_hidden_suggest_user( $u ) ) {
+                continue;
+            }
             $users[] = [
                 'id'      => (int) $u->ID,
                 'display' => (string) $u->display_name,
@@ -436,7 +449,7 @@ public function register_assets(){
                 . '}).then(function(r){return r.blob();}).then(function(b){'
                     . 'var a=document.createElement("a");'
                     . 'a.href=URL.createObjectURL(b);'
-                    . 'a.download="co360_export."+(fmt==="xls"?"xls":"csv");'
+                    . 'a.download="alteragora_export."+(fmt==="xls"?"xls":"csv");'
                     . 'document.body.appendChild(a);'
                     . 'a.click();'
                     . 'a.remove();'
@@ -477,12 +490,45 @@ public function register_assets(){
         '3.1.2',
         true
     );
+    $jszip_primary = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    $jszip_urls = wp_json_encode([
+        'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
+        'https://unpkg.com/jszip@3.10.1/dist/jszip.min.js',
+    ]);
+
     wp_register_script(
         'co360-jszip',
-        'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+        $jszip_primary,
         [],
         '3.10.1',
         true
+    );
+    wp_add_inline_script(
+        'co360-jszip',
+        "(() => {\n"
+        . "  if (window.JSZip) return;\n"
+        . "  var urls = {$jszip_urls}.slice();\n"
+        . "  var tryNext = function(){\n"
+        . "    if (window.JSZip || urls.length === 0) return;\n"
+        . "    var u = urls.shift();\n"
+        . "    var s = document.createElement('script');\n"
+        . "    s.src = u;\n"
+        . "    s.referrerPolicy = 'no-referrer';\n"
+        . "    s.onload = function(){\n"
+        . "      if (!window.JSZip && typeof JSZip !== 'undefined') { window.JSZip = JSZip; }\n"
+        . "      if (!window.JSZip) { tryNext(); }\n"
+        . "    };\n"
+        . "    s.onerror = tryNext;\n"
+        . "    document.head.appendChild(s);\n"
+        . "  };\n"
+        . "  tryNext();\n"
+        . "})();",
+        'after'
+    );
+    wp_add_inline_script(
+        'co360-jszip',
+        'if (!window.JSZip && typeof JSZip !== "undefined") { window.JSZip = JSZip; }',
+        'after'
     );
     wp_register_script(
         'co360-datatables-buttons-html5',
@@ -652,6 +698,9 @@ public function register_assets(){
             $uq = new WP_User_Query( $args );
             $users = [];
             foreach ( (array) $uq->get_results() as $u ) {
+                if ( $this->is_hidden_suggest_user( $u ) ) {
+                    continue;
+                }
                 $users[] = [
                     'id'      => (int) $u->ID,
                     'display' => (string) $u->display_name,
@@ -743,7 +792,7 @@ public function register_assets(){
         $terms = sanitize_text_field( (string) $req->get_param('term_ids') );
 
         $now   = date('Ymd_His');
-        $filename = "co360_export_{$scope}_{$now}.csv";
+        $filename = "alteragora_export_{$scope}_{$now}.csv";
 
         if ($scope === 'global') {
             // aplica rango + taxonomía si vienen
@@ -903,9 +952,9 @@ public function register_assets(){
        </h3>
 
        <div class="co360-cards">
-         <div class="co360-card"><strong>Total Visualizaciones Slide Kit</strong><span><?php echo (int)($tot['view_slidekit'] ?? 0); ?></span></div>
-         <div class="co360-card"><strong>Total Visualizaciones Highlights</strong><span><?php echo (int)($tot['view_highlights'] ?? 0); ?></span></div>
-         <div class="co360-card"><strong>Total Descargas PPT</strong><span><?php echo (int)($tot['download_ppt'] ?? 0); ?></span></div>
+         <div class="co360-card"><strong>Total visualizaciones slide kit</strong><span><?php echo (int)($tot['view_slidekit'] ?? 0); ?></span></div>
+         <div class="co360-card"><strong>Total visualizaciones highlights</strong><span><?php echo (int)($tot['view_highlights'] ?? 0); ?></span></div>
+         <div class="co360-card"><strong>Total descargas PPT</strong><span><?php echo (int)($tot['download_ppt'] ?? 0); ?></span></div>
        </div>
 
        <div class="co360-chartbox" style="height:420px">
@@ -917,9 +966,9 @@ public function register_assets(){
            <thead>
              <tr>
                <th>Título</th>
-               <th>Total Visualizaciones Slide Kit</th>
-               <th>Total Visualizaciones Highlights</th>
-               <th>Total Descargas PPT</th>
+               <th>Total visualizaciones slide kit</th>
+               <th>Total visualizaciones highlights</th>
+               <th>Total descargas PPT</th>
              </tr>
            </thead>
            <tbody>
@@ -988,14 +1037,14 @@ if (window.jQuery) {
         url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json'
       },
       buttons: [
-        {
-          extend: 'csvHtml5',
-          title: 'Alter Agora Mi Panel',
+          {
+            extend: 'csvHtml5',
+            title: 'AlterAgora Mi Panel',
           exportOptions: { columns: ':visible' }
         },
-        {
-          extend: 'excelHtml5',
-          title: 'Alter Agora Mi Panel',
+          {
+            extend: 'excelHtml5',
+            title: 'AlterAgora Mi Panel',
           exportOptions: { columns: ':visible' }
         },
         {
@@ -1081,9 +1130,9 @@ if (window.jQuery) {
           </div>
 
           <div class="co360-cards" id="co360Totals" style="margin-top:.5rem">
-            <div class="co360-card"><strong>Total Visualizaciones Slide Kit</strong><span><?php echo (int)($tot['view_slidekit']??0); ?></span></div>
-            <div class="co360-card"><strong>Total Visualizaciones Highlights</strong><span><?php echo (int)($tot['view_highlights']??0); ?></span></div>
-            <div class="co360-card"><strong>Total Descargas PPT</strong><span><?php echo (int)($tot['download_ppt']??0); ?></span></div>
+            <div class="co360-card"><strong>Total visualizaciones slide kit</strong><span><?php echo (int)($tot['view_slidekit']??0); ?></span></div>
+            <div class="co360-card"><strong>Total visualizaciones highlights</strong><span><?php echo (int)($tot['view_highlights']??0); ?></span></div>
+            <div class="co360-card"><strong>Total descargas PPT</strong><span><?php echo (int)($tot['download_ppt']??0); ?></span></div>
           </div>
 
           <div class="co360-chartbox" style="height:420px">
@@ -1095,9 +1144,9 @@ if (window.jQuery) {
               <thead>
                 <tr>
                   <th>Título</th>
-                  <th>Total Visualizaciones Slide Kit</th>
-                  <th>Total Visualizaciones Highlights</th>
-                  <th>Total Descargas PPT</th>
+                  <th class="co360-num-col">Total visualizaciones slide kit</th>
+                  <th class="co360-num-col">Total visualizaciones highlights</th>
+                  <th class="co360-num-col">Total descargas PPT</th>
                 </tr>
               </thead>
               <tbody>
@@ -1342,14 +1391,14 @@ if (window.jQuery) {
                 url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json'
               },
               buttons: [
-                {
-                  extend: 'csvHtml5',
-                  title: 'Alter Agora Estadísticas Generales',
+                  {
+                    extend: 'csvHtml5',
+                    title: 'AlterAgora Estadísticas Generales',
                   exportOptions: { columns: ':visible' }
                 },
-                {
-                  extend: 'excelHtml5',
-                  title: 'Alter Agora Estadísticas Generales',
+                  {
+                    extend: 'excelHtml5',
+                    title: 'AlterAgora Estadísticas Generales',
                   exportOptions: { columns: ':visible' }
                 },
                 {
@@ -1394,12 +1443,341 @@ if (window.jQuery) {
         })();
         </script>
         <?php
+
         return ob_get_clean();
     }
 
 
+    public function sc_user_export( $atts = [] ) {
+        if ( ! $this->can_view_users() ) {
+            return '<p>No tienes permisos para ver este informe.</p>';
+        }
 
-public function sc_user_insights($atts=[]){
+        $a = shortcode_atts(
+            [
+                'title'     => 'Exportar analítica completa de usuarios',
+                'date_from' => '',
+                'date_to'   => '',
+            ],
+            $atts
+        );
+
+        wp_enqueue_style( 'co360-analytics' );
+        $this->enqueue_datatables();
+
+        $stats = $this->get_all_user_stats( $a['date_from'], $a['date_to'] );
+
+        $all_posts = [];
+        foreach ( $stats as $row ) {
+            foreach ( $row['per_post'] as $p ) {
+                if ( empty( $all_posts[ $p['post_id'] ] ) ) {
+                    $all_posts[ $p['post_id'] ] = $p['title'];
+                }
+            }
+        }
+
+        if ( ! empty( $all_posts ) ) {
+            uasort(
+                $all_posts,
+                function( $a, $b ) {
+                    return strcasecmp( $a, $b );
+                }
+            );
+        }
+
+        $meta_labels = [
+            'user_especialidad' => 'Especialidad',
+            'user_centro'       => 'Centro',
+            'user_poblacion'    => 'Población',
+            'user_provincia'    => 'Provincia',
+            'user_nif'          => 'NIF',
+            'user_cp'           => 'CP',
+        ];
+
+        ob_start(); ?>
+        <div class="co360-ga">
+          <h3><?php echo esc_html( $a['title'] ); ?></h3>
+
+          <div class="co360-table-wrap co360-table-wrap--scroll">
+            <div class="co360-table-scroll">
+            <table id="co360UserExportTable" class="co360-table display">
+              <thead>
+                <tr>
+                  <th class="co360-col-expand no-export"></th>
+                  <th>Nombre</th>
+                  <th>Apellidos</th>
+                  <th>Email</th>
+                  <th>Registrado</th>
+                  <?php foreach ( $meta_labels as $label ) : ?>
+                    <th><?php echo esc_html( $label ); ?></th>
+                  <?php endforeach; ?>
+                  <th>Total visualizaciones slide kit</th>
+                  <th>Total visualizaciones highlights</th>
+                  <th>Total descargas PPT</th>
+                  <th class="co360-export-only">Presentación</th>
+                  <th class="co360-export-only">Slide Kit (detalle)</th>
+                  <th class="co360-export-only">Highlights (detalle)</th>
+                  <th class="co360-export-only">PPT (detalle)</th>
+                  <th class="co360-export-only">Total presentación</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ( $stats as $row ) :
+                    $per_post_map    = [];
+                    $per_post_sorted = [];
+                    foreach ( $row['per_post'] as $p ) {
+                        $per_post_map[ $p['post_id'] ] = $p;
+                    }
+
+                    foreach ( $all_posts as $post_id => $title ) {
+                        if ( isset( $per_post_map[ $post_id ] ) ) {
+                            $p     = $per_post_map[ $post_id ];
+                            $total = (int) $p['view_slidekit'] + (int) $p['view_highlights'] + (int) $p['download_ppt'];
+                            $per_post_sorted[] = [
+                                'title'      => $title,
+                                'slidekit'   => (int) $p['view_slidekit'],
+                                'highlights' => (int) $p['view_highlights'],
+                                'ppt'        => (int) $p['download_ppt'],
+                                'total'      => $total,
+                            ];
+                        }
+                    }
+
+                    $detail_export_lines = [];
+                    foreach ( $per_post_sorted as $p ) {
+                        $detail_export_lines[] = sprintf(
+                            '%s — SK: %d | HL: %d | PPT: %d | Total: %d',
+                            $p['title'],
+                            $p['slidekit'],
+                            $p['highlights'],
+                            $p['ppt'],
+                            $p['total']
+                        );
+                    }
+
+                    $detail_json   = wp_json_encode( $per_post_sorted );
+                    $detail_export = implode( "\n", $detail_export_lines );
+                ?>
+                <tr>
+                  <td class="dt-control" data-per-post="<?php echo esc_attr( $detail_json ); ?>" data-export="<?php echo esc_attr( $detail_export ?: '—' ); ?>" aria-label="Mostrar detalle"></td>
+                  <td><?php echo esc_html( $row['first_name'] ); ?></td>
+                  <td><?php echo esc_html( $row['last_name'] ); ?></td>
+                  <td><?php echo esc_html( $row['email'] ); ?></td>
+                  <td><?php echo esc_html( $row['registered'] ); ?></td>
+                  <?php foreach ( array_keys( $meta_labels ) as $meta_key ) : ?>
+                    <td><?php echo esc_html( $row['meta'][ $meta_key ] ); ?></td>
+                  <?php endforeach; ?>
+                  <td class="co360-num"><?php echo (int) $row['totals']['view_slidekit']; ?></td>
+                  <td class="co360-num"><?php echo (int) $row['totals']['view_highlights']; ?></td>
+                  <td class="co360-num"><?php echo (int) $row['totals']['download_ppt']; ?></td>
+                  <td class="co360-export-only co360-export-presentacion">—</td>
+                  <td class="co360-export-only co360-export-sk">—</td>
+                  <td class="co360-export-only co360-export-hl">—</td>
+                  <td class="co360-export-only co360-export-ppt">—</td>
+                  <td class="co360-export-only co360-export-total">—</td>
+                </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+            </div>
+          </div>
+        </div>
+        <script>
+        jQuery(function($){
+          var exportChildRowNumbers = [];
+
+          function buildChildRowsForExport(data){
+            exportChildRowNumbers = [];
+
+            try {
+              var rowNodes = table.rows({ search: 'applied', order: 'applied' }).nodes().toArray();
+              var headers  = data.header || [];
+              var cols     = headers.length;
+              var body     = [];
+
+              var titleIdx = headers.indexOf('Presentación');
+              var skIdx    = headers.indexOf('Slide Kit (detalle)');
+              var hlIdx    = headers.indexOf('Highlights (detalle)');
+              var pptIdx   = headers.indexOf('PPT (detalle)');
+              var totIdx   = headers.indexOf('Total presentación');
+
+              if (titleIdx === -1 || skIdx === -1 || hlIdx === -1 || pptIdx === -1 || totIdx === -1) {
+                titleIdx = cols - 5;
+                skIdx    = cols - 4;
+                hlIdx    = cols - 3;
+                pptIdx   = cols - 2;
+                totIdx   = cols - 1;
+              }
+
+              data.body.forEach(function(row, idx){
+                body.push(row);
+
+                var node    = rowNodes[idx];
+                var control = node ? $(node).find('td.dt-control') : null;
+                var perPost = control ? control.data('per-post') : [];
+
+                if (typeof perPost === 'string') {
+                  try { perPost = JSON.parse(perPost); } catch (e) { perPost = []; }
+                }
+
+                if (!perPost || !perPost.length) return;
+
+                perPost.forEach(function(p){
+                  var child = new Array(cols).fill('');
+                  child[titleIdx] = p.title || '';
+                  child[skIdx]    = p.slidekit || 0;
+                  child[hlIdx]    = p.highlights || 0;
+                  child[pptIdx]   = p.ppt || 0;
+                  child[totIdx]   = p.total || 0;
+
+                  body.push(child);
+                  exportChildRowNumbers.push(2 + body.length - 1);
+                });
+              });
+
+              data.body = body;
+            } catch (err) {
+              console.error('No se pudieron preparar las filas hijas para exportar', err);
+            }
+          }
+
+          function applyOutlineToSheet(xlsx){
+            try {
+              if (!exportChildRowNumbers.length || !xlsx || !xlsx.xl || !xlsx.xl.worksheets || !xlsx.xl.worksheets['sheet1.xml']) return;
+
+              var sheet  = xlsx.xl.worksheets['sheet1.xml'];
+              var $sheet = $(sheet);
+
+              var sheetPr = $sheet.find('sheetPr');
+              if (!sheetPr.length) {
+                $sheet.prepend('<sheetPr><outlinePr summaryBelow="1" summaryRight="1"/></sheetPr>');
+              } else if (!sheetPr.find('outlinePr').length) {
+                sheetPr.append('<outlinePr summaryBelow="1" summaryRight="1"/>');
+              }
+
+              exportChildRowNumbers.forEach(function(r){
+                $sheet.find('row[r="' + r + '"]').attr('outlineLevel', '1');
+              });
+
+              var serializer = new XMLSerializer();
+              xlsx.xl.worksheets['sheet1.xml'] = serializer.serializeToString($sheet[0]);
+            } catch (err) {
+              console.error('No se pudo aplicar el outline al Excel exportado', err);
+            }
+          }
+
+          var table = $('#co360UserExportTable').DataTable({
+            dom: 'Blfrtip',
+            colReorder: false,
+            ordering: true,
+            scrollX: true,
+            pageLength: 25,
+            lengthMenu: [[10,25,50,100,-1],[10,25,50,100,'Todos']],
+            order: [[1, 'asc']],
+            columnDefs: [
+              { targets: 0, className: 'dt-control', orderable: false, data: null, defaultContent: '' },
+              { targets: 'co360-export-only', visible: false, searchable: false }
+            ],
+            language: {
+              url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json'
+            },
+            buttons: [
+                {
+                  extend: 'csvHtml5',
+                  title: 'AlterAgora Analítica Usuarios',
+                exportOptions: {
+                  columns: ':visible:not(.no-export), .co360-export-only',
+                  format: {
+                      body: function ( data, row, col ) {
+                        var text = typeof data === 'string' ? data.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim() : data;
+                      var cell = table.cell(row, col).node();
+                      var extra = $(cell).data('export');
+                      if (extra) { text = extra; }
+                      return text;
+                    }
+                  },
+                  customizeData: function(data){
+                    buildChildRowsForExport(data);
+                  }
+                }
+              },
+                {
+                  extend: 'excelHtml5',
+                  title: 'AlterAgora Analítica Usuarios',
+                exportOptions: {
+                  columns: ':visible:not(.no-export), .co360-export-only',
+                  format: {
+                      body: function ( data, row, col ) {
+                        var text = typeof data === 'string' ? data.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').trim() : data;
+                      var cell = table.cell(row, col).node();
+                      var extra = $(cell).data('export');
+                      if (extra) { text = extra; }
+                      return text;
+                    }
+                  },
+                  customizeData: function(data){
+                    buildChildRowsForExport(data);
+                  }
+                },
+                customize: function(xlsx){
+                  applyOutlineToSheet(xlsx);
+                }
+              },
+              {
+                extend: 'colvis',
+                text: 'Columnas'
+              }
+            ]
+          });
+
+          function renderChild(perPost){
+            var items = perPost || [];
+            if (typeof items === 'string') {
+              try { items = JSON.parse(items); } catch (e) { items = []; }
+            }
+
+            if (!items.length) {
+              return '<div class="co360-child-empty">Sin presentaciones registradas.</div>';
+            }
+
+            var rows = items.map(function(p){
+              return '<tr>' +
+                       '<td>' + (p.title || '') + '</td>' +
+                       '<td class="co360-num">' + (p.slidekit || 0) + '</td>' +
+                       '<td class="co360-num">' + (p.highlights || 0) + '</td>' +
+                       '<td class="co360-num">' + (p.ppt || 0) + '</td>' +
+                       '<td class="co360-num co360-num--total">' + (p.total || 0) + '</td>' +
+                     '</tr>';
+            }).join('');
+
+            return '<div class="co360-child-wrap">' +
+                     '<table class="co360-child-table">' +
+                       '<thead><tr><th>Presentación</th><th>Slide Kit</th><th>Highlights</th><th>PPT</th><th>Total</th></tr></thead>' +
+                       '<tbody>' + rows + '</tbody>' +
+                     '</table>' +
+                   '</div>';
+          }
+
+          $('#co360UserExportTable tbody').on('click', 'td.dt-control', function(){
+            var tr  = $(this).closest('tr');
+            var row = table.row(tr);
+            if (row.child.isShown()) {
+              row.child.hide();
+              tr.removeClass('shown');
+            } else {
+              var perPost = $(this).data('per-post');
+              row.child(renderChild(perPost)).show();
+              tr.addClass('shown');
+            }
+          });
+        });
+        </script>
+        <?php
+        return ob_get_clean();
+    }
+
+
+    public function sc_user_insights($atts=[]){
     $a = shortcode_atts([
         'role'        => 'administrator,editor,delegado',
         'placeholder' => 'Buscar usuario por nombre o email…'
@@ -1548,9 +1926,9 @@ public function sc_user_insights($atts=[]){
         // Tarjetas
         const cards = document.createElement('div'); cards.className='co360-cards';
         cards.innerHTML = `
-          <div class="co360-card"><strong>Total Visualizaciones Slide Kit</strong><span>${(payload.totals.view_slidekit||0)}</span></div>
-          <div class="co360-card"><strong>Total Visualizaciones Highlights</strong><span>${(payload.totals.view_highlights||0)}</span></div>
-          <div class="co360-card"><strong>Total Descargas PPT</strong><span>${(payload.totals.download_ppt||0)}</span></div>`;
+          <div class="co360-card"><strong>Total visualizaciones slide kit</strong><span>${(payload.totals.view_slidekit||0)}</span></div>
+          <div class="co360-card"><strong>Total visualizaciones highlights</strong><span>${(payload.totals.view_highlights||0)}</span></div>
+          <div class="co360-card"><strong>Total descargas PPT</strong><span>${(payload.totals.download_ppt||0)}</span></div>`;
         out.appendChild(cards);
 
         // Gráfica (altura 420px)
@@ -1598,7 +1976,7 @@ public function sc_user_insights($atts=[]){
         const wrap = document.createElement('div'); wrap.className = 'co360-table-wrap';
 const table = document.createElement('table');
 table.className = 'co360-table';
-table.id = 'co360UserInsightsTable';        table.innerHTML = '<thead><tr><th>Título</th><th>Total Visualizaciones Slide Kit</th><th>Total Visualizaciones Highlights</th><th>Total Descargas PPT</th></tr></thead><tbody>'
+table.id = 'co360UserInsightsTable';        table.innerHTML = '<thead><tr><th>Título</th><th>Total visualizaciones slide kit</th><th>Total visualizaciones highlights</th><th>Total descargas PPT</th></tr></thead><tbody>'
           + rows.map(r=>`<tr><td><a href="${r.permalink}" target="_blank">${r.title}</a></td><td>${r.view_slidekit||0}</td><td>${r.view_highlights||0}</td><td>${r.download_ppt||0}</td></tr>`).join('')
           + '</tbody>';
         wrap.appendChild(table);
@@ -1623,14 +2001,14 @@ if (window.jQuery && jQuery.fn.DataTable) {
       url: 'https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-ES.json'
     },
     buttons: [
-      {
-        extend: 'csvHtml5',
-        title: 'Alter Agora Estadísticas Usuario',
+        {
+          extend: 'csvHtml5',
+          title: 'AlterAgora Estadísticas Usuario',
         exportOptions: { columns: ':visible' }
       },
-      {
-        extend: 'excelHtml5',
-        title: 'Alter Agora Estadísticas Usuario',
+        {
+          extend: 'excelHtml5',
+          title: 'AlterAgora Estadísticas Usuario',
         exportOptions: { columns: ':visible' }
       },
       {
@@ -1684,6 +2062,7 @@ if (window.jQuery && jQuery.fn.DataTable) {
                 <li><code>[co360_pdf_viewer url="..." type="slidekit|highlights"]</code></li>
                 <li><code>[co360_ppt_download url="..." label="Descargar PPT"]</code></li>
                 <li><code>[co360_user_analytics]</code>, <code>[co360_global_analytics]</code></li>
+                <li><code>[co360_user_export]</code> — tabla exportable con toda la analítica por usuario.</li>
             </ul>
             <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
                 <input type="hidden" name="action" value="co360_export_csv">
@@ -1709,7 +2088,7 @@ if (window.jQuery && jQuery.fn.DataTable) {
     }
     private function stream_csv_raw(){
         header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="co360_raw_'.date('Ymd_His').'.csv"');
+        header('Content-Disposition: attachment; filename="alteragora_raw_'.date('Ymd_His').'.csv"');
         $out = fopen('php://output','w');
         fputcsv($out, ['Fecha','User ID','Post ID','Acción','Source','IP','Session']);
         global $wpdb; $table=$wpdb->prefix.self::TABLE;
@@ -2080,6 +2459,92 @@ public function handle_remove_exclusions(){
         FROM {$table} WHERE user_id=%d AND post_id IS NOT NULL {$ds}
         GROUP BY post_id ORDER BY MAX(created_at) DESC LIMIT 200",$pp);
         return $wpdb->get_results($sql);
+    }
+
+    private function get_all_user_stats( $from = '', $to = '' ) {
+        global $wpdb;
+        $table = $wpdb->prefix . self::TABLE;
+
+        list( $date_sql, $date_params ) = $this->build_date_sql( $from, $to );
+
+        $total_sql = "SELECT user_id,
+                SUM(CASE WHEN action='view_slidekit' THEN 1 ELSE 0 END) AS view_slidekit,
+                SUM(CASE WHEN action='view_highlights' THEN 1 ELSE 0 END) AS view_highlights,
+                SUM(CASE WHEN action='download_ppt' THEN 1 ELSE 0 END) AS download_ppt
+            FROM {$table}
+            WHERE user_id IS NOT NULL {$date_sql}
+            GROUP BY user_id";
+
+        $totals_rows = ! empty( $date_params )
+            ? $wpdb->get_results( $wpdb->prepare( $total_sql, $date_params ) )
+            : $wpdb->get_results( $total_sql );
+
+        $per_post_sql = "SELECT user_id, post_id,
+                SUM(CASE WHEN action='view_slidekit' THEN 1 ELSE 0 END) AS view_slidekit,
+                SUM(CASE WHEN action='view_highlights' THEN 1 ELSE 0 END) AS view_highlights,
+                SUM(CASE WHEN action='download_ppt' THEN 1 ELSE 0 END) AS download_ppt
+            FROM {$table}
+            WHERE user_id IS NOT NULL AND post_id IS NOT NULL {$date_sql}
+            GROUP BY user_id, post_id";
+
+        $per_post_rows = ! empty( $date_params )
+            ? $wpdb->get_results( $wpdb->prepare( $per_post_sql, $date_params ) )
+            : $wpdb->get_results( $per_post_sql );
+
+        $totals = [];
+        foreach ( (array) $totals_rows as $r ) {
+            $uid            = (int) $r->user_id;
+            $totals[ $uid ] = [
+                'view_slidekit'  => (int) $r->view_slidekit,
+                'view_highlights'=> (int) $r->view_highlights,
+                'download_ppt'   => (int) $r->download_ppt,
+            ];
+        }
+
+        $per_post = [];
+        foreach ( (array) $per_post_rows as $r ) {
+            $uid = (int) $r->user_id;
+            $per_post[ $uid ][] = [
+                'post_id'        => (int) $r->post_id,
+                'title'          => get_the_title( $r->post_id ),
+                'view_slidekit'  => (int) $r->view_slidekit,
+                'view_highlights'=> (int) $r->view_highlights,
+                'download_ppt'   => (int) $r->download_ppt,
+            ];
+        }
+
+        $user_ids = array_unique( array_merge( array_keys( $totals ), array_keys( $per_post ) ) );
+        $meta_keys = [ 'user_especialidad', 'user_centro', 'user_poblacion', 'user_provincia', 'user_nif', 'user_cp' ];
+
+        $out = [];
+        foreach ( $user_ids as $uid ) {
+            $u = get_user_by( 'id', $uid );
+            if ( ! $u ) {
+                continue;
+            }
+
+            $meta = [];
+            foreach ( $meta_keys as $mk ) {
+                $meta[ $mk ] = get_user_meta( $uid, $mk, true );
+            }
+
+            $out[] = [
+                'user_id'    => $uid,
+                'first_name' => get_user_meta( $uid, 'first_name', true ),
+                'last_name'  => get_user_meta( $uid, 'last_name', true ),
+                'email'      => $u->user_email,
+                'registered' => mysql2date( 'd/m/Y', $u->user_registered ),
+                'meta'       => $meta,
+                'totals'     => [
+                    'view_slidekit'   => (int) ( $totals[ $uid ]['view_slidekit'] ?? 0 ),
+                    'view_highlights' => (int) ( $totals[ $uid ]['view_highlights'] ?? 0 ),
+                    'download_ppt'    => (int) ( $totals[ $uid ]['download_ppt'] ?? 0 ),
+                ],
+                'per_post'   => $per_post[ $uid ] ?? [],
+            ];
+        }
+
+        return $out;
     }
 
 private function get_global_totals( $from = '', $to = '', $tax = '', $term_ids = '' ) {
