@@ -7,6 +7,7 @@ class CO360_Suite_Analytics {
     const CAP_VIEW_USERS = 'co360_view_users';
     const VER = CO360_SUITE_VER;
     const EXCLUDED_OPT = 'co360_excluded_users'; // <-- AÑADIR
+    const HIDDEN_SUGGEST_EMAILS = ['soporte@comunicaciononline360.com'];
 
 
     public function __construct(){
@@ -315,6 +316,14 @@ class CO360_Suite_Analytics {
         update_option(self::EXCLUDED_OPT, $ids, false);
     }
 
+    private function is_hidden_suggest_user($user){
+        $email = is_object($user) && isset($user->user_email) ? strtolower(trim((string) $user->user_email)) : '';
+        if ($email && in_array($email, self::HIDDEN_SUGGEST_EMAILS, true)) {
+            return true;
+        }
+        return false;
+    }
+
     /** Devuelve [sql, params] para excluir user_id en consultas globales */
     private function build_excluded_sql(){
         $ids = $this->get_excluded_user_ids();
@@ -349,6 +358,9 @@ class CO360_Suite_Analytics {
         $uq = new WP_User_Query( $args );
         $users = [];
         foreach ( (array) $uq->get_results() as $u ) {
+            if ( $this->is_hidden_suggest_user( $u ) ) {
+                continue;
+            }
             $users[] = [
                 'id'      => (int) $u->ID,
                 'display' => (string) $u->display_name,
@@ -686,6 +698,9 @@ public function register_assets(){
             $uq = new WP_User_Query( $args );
             $users = [];
             foreach ( (array) $uq->get_results() as $u ) {
+                if ( $this->is_hidden_suggest_user( $u ) ) {
+                    continue;
+                }
                 $users[] = [
                     'id'      => (int) $u->ID,
                     'display' => (string) $u->display_name,
